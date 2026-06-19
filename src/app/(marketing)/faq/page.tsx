@@ -13,8 +13,8 @@ export const metadata: Metadata = pageMeta({
 
 const FAQ: { q: string; a: string }[] = [
   {
-    q: 'What is MOO Chat?',
-    a: 'MOO Chat is an AI chat assistant you add to any website with one line of code. It answers visitor questions from your own content, captures leads, and can hand off to a human on your team.',
+    q: 'What is ChatMOO?',
+    a: 'ChatMOO is an AI chat assistant you add to any website with one line of code. It answers visitor questions from your own content, captures leads, and can hand off to a human on your team.',
   },
   {
     q: 'How does it know about my business?',
@@ -46,7 +46,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Which AI models power the assistant?',
-    a: 'MOO Chat runs on Claude models. Higher plans unlock more capable model tiers for richer answers.',
+    a: 'ChatMOO runs on leading large language models. Higher plans unlock more capable model tiers for richer answers.',
   },
   {
     q: 'Can I match it to my brand?',
@@ -69,7 +69,7 @@ export default function FaqPage() {
       <PageHeader
         eyebrow="FAQ"
         title="Frequently asked questions"
-        subtitle="Everything you need to know about how MOO Chat works. Can't find an answer? Reach out anytime."
+        subtitle="Everything you need to know about how ChatMOO works. Can't find an answer? Reach out anytime."
       />
 
       <section className="container-x pb-6">

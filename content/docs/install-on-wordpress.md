@@ -1,16 +1,16 @@
 ---
 title: Install on WordPress
-description: Add MOO Chat to a WordPress site with the official plugin — no theme edits required.
+description: Add ChatMOO to a WordPress site with the official plugin — no theme edits required.
 order: 3
 ---
 
-There are two ways to add MOO Chat to WordPress. The plugin is the easiest.
+There are two ways to add ChatMOO to WordPress. The plugin is the easiest.
 
-## Option A — the MOO Chat plugin (recommended)
+## Option A — the ChatMOO plugin (recommended)
 
 1. In the dashboard, open **Install** and copy your **public key** (it looks like `moo_xxxxxxxx`).
-2. In WordPress, go to **Plugins → Add New** and install the **MOO Chat** plugin (or upload the plugin zip from the `integrations/wordpress` folder).
-3. Activate it, open the **MOO Chat** settings, and paste your public key.
+2. In WordPress, go to **Plugins → Add New** and install the **ChatMOO** plugin (or upload the plugin zip from the `integrations/wordpress` folder).
+3. Activate it, open the **ChatMOO** settings, and paste your public key.
 4. Save. The assistant now loads on every page of your site.
 
 No theme files are touched, and updates to your assistant's configuration apply automatically — the plugin only stores your key.

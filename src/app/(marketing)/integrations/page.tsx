@@ -63,7 +63,7 @@ export default function IntegrationsPage() {
         <div className="card-moo bg-pasture-light p-8 text-center">
           <h2 className="text-2xl font-bold">Don&apos;t see your platform?</h2>
           <p className="mx-auto mt-2 max-w-2xl text-ink-soft">
-            If your site lets you add a script tag, MOO Chat works. Check the docs for platform-specific
+            If your site lets you add a script tag, ChatMOO works. Check the docs for platform-specific
             steps, or ask us.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -92,13 +92,13 @@ const PLATFORMS = [
   {
     icon: '📝',
     title: 'WordPress',
-    body: 'Install the MOO Chat plugin, paste your public key, and publish. The assistant loads site-wide with no theme edits.',
+    body: 'Install the ChatMOO plugin, paste your public key, and publish. The assistant loads site-wide with no theme edits.',
     badge: 'Plugin',
   },
   {
     icon: '🛍️',
     title: 'Shopify',
-    body: 'Add the MOO Chat theme app block from your Shopify theme editor, drop it in, and set your key. Live on your storefront instantly.',
+    body: 'Add the ChatMOO theme app block from your Shopify theme editor, drop it in, and set your key. Live on your storefront instantly.',
     badge: 'Theme app block',
   },
 ];

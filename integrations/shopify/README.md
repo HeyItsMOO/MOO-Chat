@@ -1,6 +1,6 @@
-# MOO Chat — Shopify integration
+# ChatMOO — Shopify integration
 
-Two ways to put MOO Chat on a Shopify store. Both use the same `<script>` embed.
+Two ways to put ChatMOO on a Shopify store. Both use the same `<script>` embed.
 
 ## Option A — Manual install (works today, no app needed)
 
@@ -25,7 +25,7 @@ Shopify App Store (so merchants install with one click and toggle it in the them
 1. Create a Shopify Partner account and a new app (Shopify CLI: `npm init @shopify/app`).
 2. Copy `theme-app-extension/` into the app's `extensions/moo-chat/` folder.
 3. `shopify app dev` to preview, then `shopify app deploy` to publish.
-4. Merchants enable it under **Online Store → Customize → App embeds → MOO Chat** and
+4. Merchants enable it under **Online Store → Customize → App embeds → ChatMOO** and
    paste their public key.
 
 A full App Store listing also needs OAuth, an app home, and (optionally) Shopify-managed
@@ -33,7 +33,7 @@ billing — that's a separate project beyond this scaffold, but the embed block 
 of it and is done.
 
 ## Notes
-- Whichever option, add the store's domain to **Install → Allowed domains** in MOO Chat,
+- Whichever option, add the store's domain to **Install → Allowed domains** in ChatMOO,
   or the widget won't load there (anti-theft protection).
 - The widget is the same one used everywhere else — branding, knowledge base, lead form,
-  and live chat all come from the store's MOO Chat config.
+  and live chat all come from the store's ChatMOO config.

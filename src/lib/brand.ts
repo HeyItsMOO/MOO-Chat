@@ -1,5 +1,5 @@
 /**
- * Product branding. MOO Chat is a HeyItsMOO product.
+ * Product branding. ChatMOO is a HeyItsMOO product.
  * Change these to re-skin the whole platform from one place.
  */
 export const BRAND = {
@@ -14,7 +14,7 @@ export const BRAND = {
   // "Powered by" credit shown in the widget (matches the original plugin).
   poweredByText: 'Powered by HeyItsMOO.com',
   poweredByUrl: 'https://heyitsmoo.com',
-  supportEmail: 'hello@heyitsmoo.com',
+  supportEmail: 'Holler@HeyItsMOO.com',
   // ── SEO / marketing metadata (edit freely) ──
   // Longer, search-friendly description used as the default meta description.
   description:
@@ -32,7 +32,7 @@ export const BRAND = {
     'Shopify chatbot',
     'AI front desk',
     'customer service automation',
-    'Claude AI assistant',
+    'AI website assistant',
   ],
 };
 

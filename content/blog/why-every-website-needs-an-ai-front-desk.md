@@ -2,7 +2,7 @@
 title: Why every website needs an AI front desk
 description: Visitors arrive with questions and leave without answers. Here's how an always-on AI assistant closes the gap and keeps customers from bouncing.
 date: 2026-06-10
-author: The MOO Chat team
+author: The ChatMOO team
 tags: ai, support
 ---
 

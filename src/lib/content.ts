@@ -7,7 +7,7 @@
  *   title: My post
  *   description: One-line summary for SEO + listings.
  *   date: 2026-06-01
- *   author: The MOO Chat team
+ *   author: The ChatMOO team
  *   tags: ai, support
  *   order: 1            # docs only — controls sidebar order
  *   ---

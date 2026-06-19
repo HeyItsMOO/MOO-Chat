@@ -1,4 +1,4 @@
-# Deploying MOO Chat (Postgres + Vercel)
+# Deploying ChatMOO (Postgres + Vercel)
 
 The app runs on **PostgreSQL** everywhere (local and production). This is the exact,
 ordered runbook. ~20 minutes.
@@ -18,7 +18,7 @@ In Neon, create a project → copy the **connection string** (looks like
 The repo is already a Git repository with the Next.js app at its **root** (no
 sub-folder). Push it to GitHub:
 ```bash
-git add -A && git commit -m "MOO Chat"
+git add -A && git commit -m "ChatMOO"
 git push -u origin main
 ```
 (Or create an empty repo in the GitHub UI and add it as `origin` first.)

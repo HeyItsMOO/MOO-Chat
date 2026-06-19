@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { BRAND } from '@/lib/brand';
 import { getContent } from '@/lib/content';
 
-export const alt = 'MOO Chat blog post';
+export const alt = 'ChatMOO blog post';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 

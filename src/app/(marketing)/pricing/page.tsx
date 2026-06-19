@@ -8,7 +8,7 @@ import { PageHeader, CTASection } from '@/components/site/ui';
 export const metadata: Metadata = pageMeta({
   title: 'Pricing',
   description:
-    'Simple monthly pricing for MOO Chat. Start free with 100 AI replies a month, then upgrade to Starter, Pro, or Business as you grow. No credit card required to begin.',
+    'Simple monthly pricing for ChatMOO (AUD). Start free with 50 AI replies a month, then upgrade to Starter, Growth, or Business as you grow. New accounts get a 5-day Growth trial — no credit card.',
   path: '/pricing',
 });
 

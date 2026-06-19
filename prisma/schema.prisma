@@ -1,4 +1,4 @@
-// MOO Chat — multi-tenant data model.
+// ChatMOO — multi-tenant data model.
 //
 // Runs on PostgreSQL (Neon, Supabase, Vercel Postgres, or local Postgres).
 // Set DATABASE_URL to your connection string, then sync the schema with

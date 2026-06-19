@@ -1,5 +1,5 @@
 /*!
- * MOO Chat — embed loader.
+ * ChatMOO — embed loader.
  * Usage on any website:
  *   <script src="https://app.yourdomain.com/embed.js" data-key="moo_xxx" async></script>
  *
@@ -17,7 +17,7 @@
 
   var key = me.getAttribute('data-key') || me.getAttribute('data-tenant') || '';
   if (!key) {
-    console.warn('[MOO Chat] Missing data-key on the embed script tag.');
+    console.warn('[ChatMOO] Missing data-key on the embed script tag.');
     return;
   }
 

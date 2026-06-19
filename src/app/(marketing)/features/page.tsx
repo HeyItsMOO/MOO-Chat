@@ -7,7 +7,7 @@ import { PageHeader, CTASection } from '@/components/site/ui';
 export const metadata: Metadata = pageMeta({
   title: 'Features',
   description:
-    'Everything MOO Chat does: an AI assistant trained on your content, lead capture, live human handoff, on-brand theming, guardrails, usage analytics, and one-line install.',
+    'Everything ChatMOO does: an AI assistant trained on your content, lead capture, live human handoff, on-brand theming, guardrails, usage analytics, and one-line install.',
   path: '/features',
 });
 
@@ -23,7 +23,7 @@ export default function FeaturesPage() {
       <PageHeader
         eyebrow="Features"
         title="More than a chatbot — a front desk."
-        subtitle="MOO Chat greets visitors, answers from your own knowledge, turns conversations into leads, and pulls in a human when it matters."
+        subtitle="ChatMOO greets visitors, answers from your own knowledge, turns conversations into leads, and pulls in a human when it matters."
       />
 
       <section className="container-x pb-8">

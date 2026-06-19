@@ -70,9 +70,9 @@ export default function PrivacyPage() {
 
           <h2>AI processing</h2>
           <p>
-            Replies are generated using Claude models. The content you configure and the messages a
-            visitor sends are processed to produce a response. We hold the AI provider key centrally; it is
-            never exposed to the browser.
+            Replies are generated using a leading third-party AI provider. The content you configure and the
+            messages a visitor sends are processed to produce a response. We hold the AI provider key
+            centrally; it is never exposed to the browser.
           </p>
 
           <h2>Sharing</h2>

@@ -28,8 +28,8 @@ export default async function Overview() {
 
       {!ANTHROPIC_CONFIGURED && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          ⚠️ No central <code>ANTHROPIC_API_KEY</code> is set on the server yet, so the assistant returns a
-          &quot;not configured&quot; message. Add it to <code>.env</code> and restart to enable live AI replies.
+          ⚠️ The AI isn&apos;t fully configured on the server yet, so the assistant returns a
+          &quot;not configured&quot; message. Once it&apos;s set up, live AI replies turn on automatically.
         </div>
       )}
 

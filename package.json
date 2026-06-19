@@ -2,7 +2,7 @@
   "name": "moo-chat",
   "version": "0.1.0",
   "private": true,
-  "description": "MOO Chat — multi-tenant AI chat assistant platform for any website. A HeyItsMOO product.",
+  "description": "ChatMOO — multi-tenant AI chat assistant platform for any website. A HeyItsMOO product.",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

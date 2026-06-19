@@ -1,5 +1,5 @@
 /*!
- * MOO Chat — chat widget (self-contained, no dependencies).
+ * ChatMOO — chat widget (self-contained, no dependencies).
  * Loaded by embed.js. Reads window.MooChat.{key,base}.
  */
 (function () {

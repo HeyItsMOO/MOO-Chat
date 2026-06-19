@@ -1,10 +1,10 @@
-# MOO Chat — by HeyItsMOO
+# ChatMOO — by HeyItsMOO
 
 A multi-tenant SaaS platform that turns one AI chatbot into a product you can sell to
 any store. Each customer ("tenant") gets their own assistant — branding, knowledge base,
 and usage meter — installable on any website with **one script tag**.
 
-> The product name lives in `src/lib/brand.ts` (currently **MOO Chat**, a HeyItsMOO product).
+> The product name lives in `src/lib/brand.ts` (currently **ChatMOO**, a HeyItsMOO product).
 
 > Built from the InsureGroup WordPress chatbot. The original per-site model (each site
 > holds its own AI key) is flipped to a **central gateway**: the platform holds one

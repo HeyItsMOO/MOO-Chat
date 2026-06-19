@@ -2,7 +2,7 @@
 title: Turn website visitors into leads with AI chat
 description: Traffic is only half the battle. Here's a practical playbook for using an AI assistant to capture more qualified leads without adding friction.
 date: 2026-05-28
-author: The MOO Chat team
+author: The ChatMOO team
 tags: leads, growth
 ---
 

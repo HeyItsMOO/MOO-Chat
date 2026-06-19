@@ -85,7 +85,7 @@ New accounts get a 5-day free trial of Growth (no credit card); the trial always
 
 # Contact & help
 - Docs: /docs · Pricing: /pricing · Features: /features · Integrations: /integrations
-- Questions or a demo: /contact, or email hello@heyitsmoo.com`;
+- Questions or a demo: /contact, or email Holler@HeyItsMOO.com`;
 
 function appHost(): string {
   try {
@@ -96,21 +96,27 @@ function appHost(): string {
 }
 
 async function main() {
-  const pw = await bcrypt.hash('demo12345', 10);
-  const adminPw = await bcrypt.hash('admin12345', 10);
+  // Credentials are env-configurable so production never ships default passwords.
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@moochat.app').toLowerCase();
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin12345';
+  const demoEmail = (process.env.SEED_DEMO_EMAIL || 'demo@moochat.app').toLowerCase();
+  const demoPassword = process.env.SEED_DEMO_PASSWORD || 'demo12345';
+
+  const pw = await bcrypt.hash(demoPassword, 10);
+  const adminPw = await bcrypt.hash(adminPassword, 10);
 
   // Platform super-admin (you).
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@moochat.app' },
+    where: { email: adminEmail },
     update: {},
-    create: { email: 'admin@moochat.app', name: 'Platform Admin', passwordHash: adminPw, isSuperAdmin: true },
+    create: { email: adminEmail, name: 'Platform Admin', passwordHash: adminPw, isSuperAdmin: true },
   });
 
   // Demo customer.
   const demoUser = await prisma.user.upsert({
-    where: { email: 'demo@moochat.app' },
+    where: { email: demoEmail },
     update: {},
-    create: { email: 'demo@moochat.app', name: 'Demo Owner', passwordHash: pw },
+    create: { email: demoEmail, name: 'Demo Owner', passwordHash: pw },
   });
 
   // Demo tenant: InsureGroup, on the Pro plan so all features are visible.
@@ -214,7 +220,7 @@ async function main() {
             position: 'right',
             launcherLabel: 'Chat with us 🐄',
             showPoweredBy: false,
-            contactEmail: 'hello@heyitsmoo.com',
+            contactEmail: 'Holler@HeyItsMOO.com',
             model: 'claude-haiku-4-5-20251001',
             maxTokens: 800,
             persona: CHATMOO_PERSONA,
@@ -225,7 +231,7 @@ async function main() {
             leadFormTitle: 'Talk to a human',
             leadFormIntro: 'Leave your details and the ChatMOO team will get back to you.',
             leadFormButtonLabel: 'Send',
-            leadNotifyEmail: 'hello@heyitsmoo.com',
+            leadNotifyEmail: 'Holler@HeyItsMOO.com',
             leadFormFields: JSON.stringify([
               { key: 'name', label: 'Name', type: 'text', required: true },
               { key: 'email', label: 'Email', type: 'email', required: true },
@@ -250,8 +256,8 @@ async function main() {
   }
 
   console.log('\nLogins:');
-  console.log('  Customer demo : demo@moochat.app / demo12345');
-  console.log('  Super admin   : admin@moochat.app / admin12345');
+  console.log(`  Customer demo : ${demoEmail} / ${demoPassword}`);
+  console.log(`  Super admin   : ${adminEmail} / ${adminPassword}`);
 }
 
 main()

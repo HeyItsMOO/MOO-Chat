@@ -59,7 +59,6 @@ export function SiteFooter() {
           <span className="flex items-center gap-4">
             <Link href="/legal/privacy" className="hover:text-accent">Privacy</Link>
             <Link href="/legal/terms" className="hover:text-accent">Terms</Link>
-            <span className="text-white/50">Built on Claude</span>
           </span>
         </div>
       </div>

@@ -4,7 +4,7 @@ description: Configure the in-chat lead form, get notified, and export leads fro
 order: 5
 ---
 
-MOO Chat turns conversations into leads with a built-in enquiry form. Here's how to set it up and work the leads you collect.
+ChatMOO turns conversations into leads with a built-in enquiry form. Here's how to set it up and work the leads you collect.
 
 ## Configure the lead form
 
@@ -21,7 +21,7 @@ The assistant offers the form at natural moments — for example when a visitor 
 
 ## Get notified
 
-When a lead comes in, MOO Chat emails your **notify email** with the details and the conversation context. If email isn't configured yet, submissions are still saved to your dashboard.
+When a lead comes in, ChatMOO emails your **notify email** with the details and the conversation context. If email isn't configured yet, submissions are still saved to your dashboard.
 
 ## Review and export
 

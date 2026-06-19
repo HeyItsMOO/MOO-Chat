@@ -1,4 +1,4 @@
-# MOO Chat — build roadmap
+# ChatMOO — build roadmap
 
 Turning the InsureGroup chatbot into a sellable, multi-tenant SaaS, in stages.
 
@@ -115,4 +115,4 @@ Not a build stage — the runbook to go live:
 - **Stack:** Next.js on Vercel + Neon Postgres + Stripe + Resend + Anthropic.
 - **Targets:** universal script tag first (covers any site), then WordPress + Shopify.
 - **Onboarding:** hybrid — self-serve signup, with super-admin assist (Stage 6).
-- **Product name:** "MOO Chat" (a HeyItsMOO product) — change in `src/lib/brand.ts`.
+- **Product name:** "ChatMOO" (a HeyItsMOO product) — change in `src/lib/brand.ts`.

@@ -4,7 +4,7 @@
  */
 export const EMAIL_CONFIGURED = !!process.env.RESEND_API_KEY;
 
-const FROM = process.env.EMAIL_FROM || 'MOO Chat <onboarding@resend.dev>';
+const FROM = process.env.EMAIL_FROM || 'ChatMOO <onboarding@resend.dev>';
 
 export async function sendEmail(opts: {
   to: string;

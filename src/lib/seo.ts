@@ -18,7 +18,7 @@ export function pageMeta(opts: {
   description: string;
   /** Root-relative path, e.g. "/pricing". */
   path: string;
-  /** Use the exact title without the "· MOO Chat" suffix (for the home page). */
+  /** Use the exact title without the "· ChatMOO" suffix (for the home page). */
   titleAbsolute?: boolean;
   /** Override the social card image (defaults to the generated OG image). */
   image?: string;

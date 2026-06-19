@@ -4,7 +4,7 @@ description: Create your account, build your first assistant, and get it live on
 order: 1
 ---
 
-Welcome to MOO Chat. This guide takes you from sign-up to a live assistant on your site in about five minutes.
+Welcome to ChatMOO. This guide takes you from sign-up to a live assistant on your site in about five minutes.
 
 ## 1. Create your account
 
