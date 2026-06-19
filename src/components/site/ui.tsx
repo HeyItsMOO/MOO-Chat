@@ -13,17 +13,19 @@ export function PageHeader({
   center?: boolean;
 }) {
   return (
-    <div className={`container-x pt-16 pb-10 sm:pt-20 ${center ? 'text-center' : ''}`}>
-      <div className={center ? 'mx-auto max-w-3xl' : 'max-w-3xl'}>
-        {eyebrow && (
-          <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700">
-            {eyebrow}
-          </span>
-        )}
-        <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{title}</h1>
-        {subtitle && <p className="mt-5 text-lg text-ink-soft">{subtitle}</p>}
+    <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
+      <div className={`container-x pt-14 pb-12 sm:pt-20 ${center ? 'text-center' : ''}`}>
+        <div className={center ? 'mx-auto max-w-3xl' : 'max-w-3xl'}>
+          {eyebrow && (
+            <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700">
+              {eyebrow}
+            </span>
+          )}
+          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{title}</h1>
+          {subtitle && <p className="mt-5 text-lg text-ink-soft">{subtitle}</p>}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
