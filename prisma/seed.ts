@@ -89,13 +89,22 @@ New accounts get a 5-day free trial of Growth (no credit card); the trial always
 
 function appHost(): string {
   try {
-    return new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').host.replace(/^www\./, '');
+    const raw = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').trim();
+    const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    return new URL(url).host.replace(/^www\./, '');
   } catch {
     return 'localhost';
   }
 }
 
 async function main() {
+  // Never ship a default-password admin to production.
+  if (process.env.NODE_ENV === 'production' && !process.env.SEED_ADMIN_PASSWORD) {
+    throw new Error(
+      'Refusing to seed production without SEED_ADMIN_PASSWORD set (would create a default-password admin). Set SEED_ADMIN_PASSWORD and retry.',
+    );
+  }
+
   // Credentials are env-configurable so production never ships default passwords.
   const adminEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@moochat.app').toLowerCase();
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin12345';

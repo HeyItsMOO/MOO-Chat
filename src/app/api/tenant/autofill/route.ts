@@ -5,6 +5,8 @@ import { rateLimit } from '@/lib/tenant';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// Deep crawls make many outbound fetches; allow more than the 10s default.
+export const maxDuration = 60;
 
 /**
  * Auto-setup: scrape the customer's website and return draft assistant content.
