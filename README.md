@@ -14,13 +14,14 @@ and usage meter — installable on any website with **one script tag**.
 
 ## Quick start (local)
 
+You'll need a **PostgreSQL** database. The fastest path is a free **Neon** branch
+(neon.tech) or **Supabase** — or run Postgres locally. Then:
+
 ```bash
-cd frontdesk
-npm install                      # already done
-cp .env.example .env             # a .env is already created for you
-#  → open .env and paste your ANTHROPIC_API_KEY to enable live AI replies
-npm run db:push                  # create the SQLite database (already done)
-npm run db:seed                  # seed demo data (already done)
+npm install
+cp .env.example .env             # then set DATABASE_URL + ANTHROPIC_API_KEY
+npm run db:push                  # create the tables in your Postgres database
+npm run db:seed                  # seed demo data (admin + InsureGroup demo)
 npm run dev                      # http://localhost:3000
 ```
 
@@ -86,7 +87,7 @@ Customer's website
                                   ▼
         Next.js app (Vercel)  ── /api/v1/widget/*  ── the gateway
                                   │
-                                  ├── Prisma ─► Postgres/SQLite  (tenants, convos, usage)
+                                  ├── Prisma ─► PostgreSQL  (tenants, convos, usage)
                                   └── Anthropic SDK ─► ONE central API key (metered)
 ```
 
@@ -112,13 +113,18 @@ Customer's website
 
 ---
 
-## Going to production (Postgres + Vercel)
+## Going to production (Vercel)
 
-1. Create a free Postgres DB at **neon.tech** (or Supabase) and copy the connection string.
-2. In `prisma/schema.prisma`, change `provider = "sqlite"` to `provider = "postgresql"`.
+The repo is Vercel-ready — import it and add env vars. Full runbook in **[DEPLOY.md](./DEPLOY.md)**.
+
+1. Create a free Postgres DB at **neon.tech** (or Supabase / Vercel Postgres) and copy
+   the connection string.
+2. Import the repo in Vercel — the project root is the repo root and Next.js is
+   auto-detected. `vercel.json` pins the build command to `npm run vercel-build`, which
+   runs `prisma generate && prisma db push && next build`, so the schema is created on
+   the first deploy.
 3. Set env vars on Vercel: `DATABASE_URL`, `ANTHROPIC_API_KEY`, `AUTH_SECRET`,
-   `NEXT_PUBLIC_APP_URL` (your deployed URL).
-4. `npx prisma migrate deploy` (or `prisma db push`) against the Postgres URL, then seed.
-5. Deploy to Vercel (`vercel` or connect the Git repo). `npm run build` runs `prisma generate`.
+   `NEXT_PUBLIC_APP_URL` (your deployed URL), plus PayPal/Resend when you enable them.
+4. Deploy. To load the demo/admin data once, run `npm run db:seed` against the Postgres URL.
 
 See `ROADMAP.md` for what's next (billing, lead forms, live chat, auto-setup, WP/Shopify, admin).

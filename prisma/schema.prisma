@@ -1,18 +1,19 @@
 // MOO Chat — multi-tenant data model.
 //
-// LOCAL DEV uses SQLite so it runs with zero setup.
-// FOR PRODUCTION: change `provider` to "postgresql" and set DATABASE_URL to your
-// Neon/Supabase connection string, then run `npx prisma migrate deploy`.
+// Runs on PostgreSQL (Neon, Supabase, Vercel Postgres, or local Postgres).
+// Set DATABASE_URL to your connection string, then sync the schema with
+// `prisma db push` (what the Vercel build runs) or `prisma migrate` if you
+// prefer versioned migrations.
 //
 // The schema is intentionally portable: statuses/roles are plain strings and
-// JSON blobs are stored as strings, so the same models work on SQLite and Postgres.
+// JSON blobs are stored as strings.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

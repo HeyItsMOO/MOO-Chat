@@ -1,48 +1,34 @@
-# Deploying MOO Chat (Neon Postgres + Vercel)
+# Deploying MOO Chat (Postgres + Vercel)
 
-Local dev runs on SQLite with zero setup. Production needs Postgres. This is the
-exact, ordered runbook. ~30 minutes.
+The app runs on **PostgreSQL** everywhere (local and production). This is the exact,
+ordered runbook. ~20 minutes.
 
 ## 0. Accounts you'll need (all have free tiers)
-- **Neon** (Postgres) — https://neon.tech
+- **Neon** (Postgres) — https://neon.tech  (Supabase or Vercel Postgres work too)
 - **Vercel** (hosting) — https://vercel.com
 - **Anthropic** (the AI) — https://console.anthropic.com
 - **PayPal Developer** (billing, optional at first) — https://developer.paypal.com
 - **Resend** (email, optional at first) — https://resend.com
 
 ## 1. Create the database
-1. In Neon, create a project → copy the **connection string** (looks like
-   `postgresql://user:pass@host/db?sslmode=require`).
+In Neon, create a project → copy the **connection string** (looks like
+`postgresql://user:pass@host/db?sslmode=require`).
 
-## 2. Switch the schema to Postgres
-In `prisma/schema.prisma`, change the datasource provider:
-```prisma
-datasource db {
-  provider = "postgresql"   // was "sqlite"
-  url      = env("DATABASE_URL")
-}
-```
-
-## 3. Generate the initial migration against Neon
-From `frontdesk/`, with `DATABASE_URL` set to your Neon string:
+## 2. Push to GitHub
+The repo is already a Git repository with the Next.js app at its **root** (no
+sub-folder). Push it to GitHub:
 ```bash
-# PowerShell:  $env:DATABASE_URL="postgresql://...";  bash:  export DATABASE_URL="postgresql://..."
-npx prisma migrate dev --name init      # creates prisma/migrations/ AND applies it to Neon
-npm run db:seed                          # seed the demo + admin (optional in prod)
+git add -A && git commit -m "MOO Chat"
+git push -u origin main
 ```
-Commit the generated `prisma/migrations/` folder — Vercel uses it.
+(Or create an empty repo in the GitHub UI and add it as `origin` first.)
 
-## 4. Push to GitHub
-```bash
-cd frontdesk
-git init && git add -A && git commit -m "MOO Chat"
-gh repo create moo-chat --private --source=. --push      # or push to a repo you made
-```
-
-## 5. Deploy on Vercel
-1. Import the repo in Vercel. Set the **Root Directory** to `frontdesk` if the repo
-   root is one level up.
-2. **Build command:** `npm run vercel-build` (runs `prisma migrate deploy` then builds).
+## 3. Deploy on Vercel
+1. Import the repo in Vercel. The **Root Directory** is the repo root — leave it as-is;
+   Next.js is auto-detected.
+2. **Build command:** already pinned by `vercel.json` to `npm run vercel-build`, which runs
+   `prisma generate && prisma db push && next build`. `prisma db push` creates the tables on
+   the first deploy, so there is no separate migration step.
 3. Add **Environment Variables** (Production):
 
    | Variable | Value |
@@ -52,17 +38,28 @@ gh repo create moo-chat --private --source=. --push      # or push to a repo you
    | `AUTH_SECRET` | a long random string (`openssl rand -hex 48`) |
    | `NEXT_PUBLIC_APP_URL` | your final URL, e.g. `https://app.heyitsmoo.com` |
    | `PAYPAL_ENV` / `PAYPAL_CLIENT_ID` / `PAYPAL_SECRET` | when enabling billing |
-   | `PAYPAL_WEBHOOK_ID` | **required** once billing is on (see §7) |
+   | `PAYPAL_WEBHOOK_ID` | **required** once billing is on (see §5) |
    | `PAYPAL_PLAN_STARTER/PRO/BUSINESS` | from `npm run paypal:setup` |
    | `RESEND_API_KEY` / `EMAIL_FROM` | when enabling email |
 
-4. Deploy. Visit the URL — log in as the seeded admin to confirm.
+4. Deploy. To load the demo + admin once (optional), run the seed locally with
+   `DATABASE_URL` pointed at your production Postgres:
+   ```bash
+   npm run db:seed
+   ```
+   Visit the URL — log in as the seeded admin to confirm.
 
-## 6. Point your domain
+> **Versioned migrations (optional).** This setup uses `prisma db push`, which syncs the
+> schema directly — simplest for a single app and fine for production at this scale. If you
+> later want a migration history, run `npx prisma migrate dev --name init` against your
+> Postgres URL, commit the generated `prisma/migrations/` folder, and switch the
+> `vercel-build` script from `prisma db push` to `prisma migrate deploy`.
+
+## 4. Point your domain
 In Vercel → Project → Domains, add `app.heyitsmoo.com` and follow the DNS steps.
 Set `NEXT_PUBLIC_APP_URL` to that domain and redeploy so the embed snippet uses it.
 
-## 7. Turn on billing (when ready)
+## 5. Turn on billing (when ready)
 1. Locally with prod PayPal creds: `npm run paypal:setup` → paste the printed
    `PAYPAL_PLAN_*` lines into Vercel env.
 2. In the PayPal dashboard, create a **webhook** → URL `https://YOUR-APP/api/webhooks/paypal`,
@@ -70,7 +67,7 @@ Set `NEXT_PUBLIC_APP_URL` to that domain and redeploy so the embed snippet uses 
    into `PAYPAL_WEBHOOK_ID`. **This is required** — the webhook rejects unverified events,
    so billing won't update tenants without it.
 
-## 8. Production hardening (recommended)
+## 6. Production hardening (recommended)
 - **Rate limiting:** the in-memory limiter in `src/lib/tenant.ts` is per-instance and
   resets on cold start. For real protection, back it with **Vercel KV / Upstash Redis**
   (same `rateLimit(key, limit)` interface). The DB-backed monthly quota still caps cost.
