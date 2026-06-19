@@ -23,13 +23,24 @@ export function hostFromOriginOrReferer(origin: string | null, referer: string |
 /**
  * Is this request origin allowed to use the tenant's widget?
  * Rule: the tenant's own website host is always allowed, plus any AllowedDomain
- * rows. localhost is allowed in development for easy testing.
+ * rows. Same-origin requests (the embed served by this same app) and localhost
+ * in development are always allowed for easy testing.
+ *
+ * `selfHost` is this app's own serving host (the request's Host header). When
+ * the page making the request is served by us — e.g. our always-on site bot on
+ * our marketing site — it's same-origin and trusted regardless of which domain
+ * (vercel alias, custom domain, …) the app happens to be on. A third-party site
+ * can never make a browser send a request whose Origin/Referer equals our host.
  */
 export function isOriginAllowed(
   reqHost: string,
   tenantWebsite: string,
   allowed: { domain: string }[],
+  selfHost?: string | null,
 ): boolean {
+  // Same-origin embed (our own bot on our own domain): always trusted.
+  const self = normalizeHost(selfHost);
+  if (reqHost && self && reqHost === self) return true;
   // Fail closed in production: a real browser always sends Origin (cross-origin
   // POST) or Referer (same-origin embed). A header-less direct API call (curl,
   // server-to-server) is treated as not-allowed in prod so a scraped public key

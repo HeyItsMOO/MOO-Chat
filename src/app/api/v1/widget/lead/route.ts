@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   }
 
   const reqHost = hostFromOriginOrReferer(origin, referer);
-  if (!isOriginAllowed(reqHost, tenant.websiteUrl, tenant.allowedDomains)) {
+  if (!isOriginAllowed(reqHost, tenant.websiteUrl, tenant.allowedDomains, req.headers.get('host'))) {
     return jsonWithCors({ ok: false, error: 'origin_not_allowed' }, origin, 403);
   }
 
