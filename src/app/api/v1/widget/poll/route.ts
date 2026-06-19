@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   // Same per-tenant domain allowlist the other widget endpoints enforce, so a
   // scraped public key can't be used to read transcripts from another site.
   const reqHost = hostFromOriginOrReferer(origin, req.headers.get('referer'));
-  if (!isOriginAllowed(reqHost, tenant.websiteUrl, tenant.allowedDomains)) {
+  if (!isOriginAllowed(reqHost, tenant.websiteUrl, tenant.allowedDomains, req.headers.get('host'))) {
     return jsonWithCors({ status: 'bot', agent: '', messages: [] }, origin, 403);
   }
 
