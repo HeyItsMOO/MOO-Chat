@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "vercel-build": "prisma generate && prisma db push && (if [ \"$SEED_ON_DEPLOY\" = \"1\" ]; then echo '[seed] running…' && tsx prisma/seed.ts; else echo '[seed] skipped (set SEED_ON_DEPLOY=1 to seed on deploy)'; fi) && next build",
+    "vercel-build": "prisma generate && prisma db push && (if [ \"$SEED_ON_DEPLOY\" = \"1\" ]; then echo '[seed] running…' && (tsx prisma/seed.ts || echo '[seed] FAILED — continuing build (check SEED_ADMIN_PASSWORD / DATABASE_URL)'); else echo '[seed] skipped (set SEED_ON_DEPLOY=1 to seed on deploy)'; fi) && next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
