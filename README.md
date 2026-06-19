@@ -113,6 +113,28 @@ Customer's website
 
 ---
 
+## Marketing site, blog & SEO
+
+The public-facing website lives in the `src/app/(marketing)/` route group with a shared
+header/footer (`src/components/site/`). Navigation and the sitemap are both driven from
+`src/lib/site.ts`, so adding a page in one place keeps them in sync.
+
+- **Add a blog post:** drop a Markdown file in `content/blog/` with front-matter
+  (`title`, `description`, `date`, `author`, `tags`). It appears at `/blog/<filename>`.
+- **Add a docs page:** drop a Markdown file in `content/docs/` with front-matter
+  (`title`, `description`, `order`). It appears at `/docs/<filename>` and in the sidebar.
+
+**SEO is centralized:**
+
+- Per-page metadata via `pageMeta()` in `src/lib/seo.ts` (canonical + Open Graph + Twitter).
+- JSON-LD structured data builders in the same file (Organization, WebSite,
+  SoftwareApplication, FAQPage, BreadcrumbList, BlogPosting).
+- `app/robots.ts`, `app/sitemap.ts` (auto-includes blog/docs), and `app/manifest.ts`.
+- Generated icons & social cards: `app/icon.tsx`, `app/apple-icon.tsx`,
+  `app/opengraph-image.tsx`, plus a dynamic image per blog post.
+- Brand defaults (name, description, keywords, social handle) live in `src/lib/brand.ts`.
+  Canonical/OG URLs are built from `NEXT_PUBLIC_APP_URL`, so set it in production.
+
 ## Going to production (Vercel)
 
 The repo is Vercel-ready — import it and add env vars. Full runbook in **[DEPLOY.md](./DEPLOY.md)**.

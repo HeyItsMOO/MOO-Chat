@@ -19,3 +19,57 @@ body {
 .container-x {
   @apply mx-auto w-full max-w-6xl px-5;
 }
+
+/* Typographic wrapper for rendered markdown (blog/docs) and legal pages. */
+.prose-moo {
+  @apply text-[15px] leading-relaxed text-ink-soft;
+}
+.prose-moo > :first-child {
+  @apply mt-0;
+}
+.prose-moo h2 {
+  @apply mt-10 mb-3 text-2xl font-bold tracking-tight text-ink;
+}
+.prose-moo h3 {
+  @apply mt-8 mb-2 text-lg font-semibold text-ink;
+}
+.prose-moo p {
+  @apply my-4;
+}
+.prose-moo ul {
+  @apply my-4 list-disc space-y-2 pl-6;
+}
+.prose-moo ol {
+  @apply my-4 list-decimal space-y-2 pl-6;
+}
+.prose-moo a {
+  @apply font-medium text-brand-700 underline underline-offset-2 hover:text-brand-900;
+}
+.prose-moo strong {
+  @apply font-semibold text-ink;
+}
+.prose-moo code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.85em] text-ink;
+}
+.prose-moo pre {
+  @apply my-5 overflow-x-auto rounded-xl bg-ink p-4 text-sm leading-relaxed text-slate-100;
+}
+.prose-moo pre code {
+  @apply bg-transparent p-0 text-slate-100;
+}
+.prose-moo blockquote {
+  @apply my-5 border-l-4 border-brand-200 pl-4 italic text-ink-soft;
+}
+.prose-moo table {
+  @apply my-6 w-full border-collapse text-sm;
+}
+.prose-moo th,
+.prose-moo td {
+  @apply border border-slate-200 px-3 py-2 text-left;
+}
+.prose-moo th {
+  @apply bg-slate-50 font-semibold text-ink;
+}
+.prose-moo hr {
+  @apply my-8 border-slate-200;
+}
