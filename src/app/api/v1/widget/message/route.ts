@@ -12,7 +12,7 @@ import { buildSystemPrompt, prepareMessages } from '@/lib/prompt';
 import { chat, ANTHROPIC_CONFIGURED } from '@/lib/anthropic';
 import { tryReserve, refundReservation, recordTokens } from '@/lib/usage';
 import { getOrCreateConversation, addMessage } from '@/lib/store';
-import { getPlan } from '@/lib/plans';
+import { getPlan, effectivePlanId } from '@/lib/plans';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -99,11 +99,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Payment-failed tenants are served at the free tier (grace) until resolved.
-  const effectivePlan = tenant.status === 'past_due' ? 'free' : tenant.plan;
+  // Payment-failed tenants drop to free (grace); trialing tenants get the trial plan.
+  const planId = tenant.status === 'past_due' ? 'free' : effectivePlanId(tenant);
 
   // Atomically reserve a monthly message slot (closes the quota race).
-  if (!(await tryReserve(tenant.id, effectivePlan))) {
+  if (!(await tryReserve(tenant.id, planId))) {
     return fallback(origin, 'The assistant has reached its monthly limit. Please reach out directly', phone, 200);
   }
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
   const context = typeof body.context === 'string' ? body.context.slice(0, 600) : '';
   if (context) system += `\n\n=== CURRENT CONTEXT (advisory) ===\n${context}`;
 
-  const plan = getPlan(effectivePlan);
+  const plan = getPlan(planId);
   const model = plan.models.includes(a.model) ? a.model : plan.models[0];
 
   const result = await chat({ model, system, messages, maxTokens: a.maxTokens });

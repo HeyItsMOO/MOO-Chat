@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan } from '@/lib/plans';
+import { effectivePlan } from '@/lib/plans';
 
 export const runtime = 'nodejs';
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   // Enforce that the chosen model is allowed on this plan.
   if (data.model) {
-    const plan = getPlan(ctx.tenant.plan);
+    const plan = effectivePlan(ctx.tenant);
     if (!plan.models.includes(data.model)) {
       return NextResponse.json(
         { error: `The ${data.model} model isn't available on the ${plan.name} plan.` },
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Free plan can't remove branding.
-  if (data.showPoweredBy === false && !getPlan(ctx.tenant.plan).features.removeBranding) {
+  if (data.showPoweredBy === false && !effectivePlan(ctx.tenant).features.removeBranding) {
     data.showPoweredBy = true;
   }
 

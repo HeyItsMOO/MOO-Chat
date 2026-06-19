@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCurrentContext } from '@/lib/auth';
 import { getUsage } from '@/lib/usage';
-import { getPlan } from '@/lib/plans';
+import { effectivePlan, isTrialActive, trialDaysLeft } from '@/lib/plans';
 import { APP_URL } from '@/lib/brand';
 import { ANTHROPIC_CONFIGURED } from '@/lib/anthropic';
 import { CopyButton } from './_components';
@@ -12,7 +12,8 @@ export default async function Overview() {
   if (!ctx?.tenant) return null;
   const tenant = ctx.tenant;
   const usage = await getUsage(tenant.id);
-  const plan = getPlan(tenant.plan);
+  const plan = effectivePlan(tenant);
+  const onTrial = isTrialActive(tenant);
   const pct = Math.min(100, Math.round((usage.messageCount / plan.messagesPerMonth) * 100));
   const convoCount = await prisma.conversation.count({ where: { tenantId: tenant.id, msgCount: { gt: 0 } } });
 
@@ -40,7 +41,10 @@ export default async function Overview() {
           </div>
         </Stat>
         <Stat label="Conversations" value={convoCount.toLocaleString()} />
-        <Stat label="Current plan" value={plan.name}>
+        <Stat label="Current plan" value={onTrial ? `${plan.name} (trial)` : plan.name}>
+          {onTrial && (
+            <div className="mt-1 text-xs font-semibold text-brand-700">{trialDaysLeft(tenant)} day(s) left in your trial</div>
+          )}
           <Link href="/dashboard/billing" className="mt-2 inline-block text-sm font-semibold text-brand-700 hover:underline">
             Manage plan →
           </Link>

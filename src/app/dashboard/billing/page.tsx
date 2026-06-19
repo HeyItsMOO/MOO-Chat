@@ -1,5 +1,5 @@
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan, PLAN_LIST } from '@/lib/plans';
+import { getPlan, effectivePlan, PLAN_LIST, formatPrice, isTrialActive, trialDaysLeft } from '@/lib/plans';
 import { getUsage } from '@/lib/usage';
 import { PAYPAL_CONFIGURED } from '@/lib/paypal';
 import { BillingActions } from './BillingActions';
@@ -15,7 +15,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const ctx = await getCurrentContext();
   if (!ctx?.tenant) return null;
   const tenant = ctx.tenant;
-  const plan = getPlan(tenant.plan);
+  const plan = effectivePlan(tenant); // what they can use right now (trial = top plan)
+  const actualPlan = getPlan(tenant.plan); // their actual subscription tier
+  const onTrial = isTrialActive(tenant);
   const usage = await getUsage(tenant.id);
   const sp = await searchParams;
   const bannerKey = sp.upgraded ? 'upgraded' : sp.pending ? 'pending' : sp.cancelled ? 'cancelled' : sp.error ? 'error' : '';
@@ -25,7 +27,15 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Billing &amp; plan</h1>
-        <p className="text-ink-soft">You&apos;re on the <strong>{plan.name}</strong> plan.</p>
+        {onTrial ? (
+          <p className="text-ink-soft">
+            You&apos;re trialing the <strong>{plan.name}</strong> plan — {trialDaysLeft(tenant)} day(s) left
+            {tenant.trialEndsAt ? ` (ends ${new Date(tenant.trialEndsAt).toLocaleDateString()})` : ''}. Pick a plan
+            below to keep your features after the trial.
+          </p>
+        ) : (
+          <p className="text-ink-soft">You&apos;re on the <strong>{actualPlan.name}</strong> plan.</p>
+        )}
       </div>
 
       {banner && (
@@ -76,12 +86,15 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
       <div className="grid gap-4 sm:grid-cols-2">
         {PLAN_LIST.map((p) => (
-          <div key={p.id} className={`rounded-2xl border p-5 ${p.id === plan.id ? 'border-brand-600 ring-1 ring-brand-600' : 'border-slate-200'}`}>
+          <div key={p.id} className={`rounded-2xl border p-5 ${p.id === actualPlan.id ? 'border-brand-600 ring-1 ring-brand-600' : 'border-slate-200'}`}>
             <div className="flex items-center justify-between">
               <h3 className="font-bold">{p.name}</h3>
-              {p.id === plan.id && <span className="text-xs font-semibold text-brand-700">Current</span>}
+              {p.id === actualPlan.id && <span className="text-xs font-semibold text-brand-700">Current</span>}
             </div>
-            <div className="mt-1 text-2xl font-extrabold">${p.priceMonthly}<span className="text-sm font-normal text-ink-mute">/mo</span></div>
+            <div className="mt-1 text-2xl font-extrabold">
+              {formatPrice(p.priceMonthly)}
+              {p.priceMonthly > 0 && <span className="text-sm font-normal text-ink-mute">/mo</span>}
+            </div>
             <ul className="mt-3 space-y-1 text-sm text-ink-soft">
               <li>✓ {p.messagesPerMonth.toLocaleString()} replies / month</li>
               <li>{p.features.liveChat ? '✓' : '·'} Live chat handoff</li>
@@ -91,7 +104,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
             <div className="mt-4">
               <BillingActions
                 planId={p.id}
-                isCurrent={p.id === plan.id}
+                isCurrent={p.id === actualPlan.id}
                 paypalConfigured={PAYPAL_CONFIGURED}
                 hasSubscription={!!tenant.paypalSubscriptionId}
               />

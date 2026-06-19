@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { PLAN_LIST } from '@/lib/plans';
+import { PLAN_LIST, formatPrice } from '@/lib/plans';
 import { pageMeta, softwareAppJsonld, faqJsonld, breadcrumbJsonld } from '@/lib/seo';
 import { JsonLd } from '@/components/site/JsonLd';
 import { PageHeader, CTASection } from '@/components/site/ui';
@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMeta({
 const PRICING_FAQ = [
   {
     q: 'Is there really a free plan?',
-    a: 'Yes. The Free plan includes 100 AI replies per month with lead capture, no credit card required. Upgrade only when you need more volume or features.',
+    a: 'Yes. The Free plan includes 50 AI replies per month with lead capture — no credit card. New accounts also get a 5-day trial of the Growth plan (more replies, live chat, no branding), so you can try the full thing first.',
   },
   {
     q: 'What counts as a "message"?',
@@ -52,7 +52,7 @@ export default function PricingPage() {
       <PageHeader
         eyebrow="Pricing"
         title="Simple, monthly pricing."
-        subtitle="Start free. Upgrade when you grow. No credit card required to begin."
+        subtitle="Prices in AUD. Start free, or take a 5-day trial of Growth — no credit card. Upgrade when you grow."
       />
 
       {/* Plan cards */}
@@ -69,8 +69,8 @@ export default function PricingPage() {
               )}
               <h2 className="font-heading text-lg font-bold">{p.name}</h2>
               <div className="mt-2">
-                <span className="font-heading text-4xl font-extrabold">${p.priceMonthly}</span>
-                <span className="text-ink-mute">/mo</span>
+                <span className="font-heading text-4xl font-extrabold">{formatPrice(p.priceMonthly)}</span>
+                {p.priceMonthly > 0 && <span className="text-ink-mute">/mo</span>}
               </div>
               <ul className="mt-4 flex-1 space-y-2 text-sm font-semibold text-ink-soft">
                 <li>✓ {p.messagesPerMonth.toLocaleString()} AI replies / month</li>

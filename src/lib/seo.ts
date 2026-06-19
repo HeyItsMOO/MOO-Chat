@@ -103,7 +103,7 @@ export function softwareAppJsonld() {
       '@type': 'Offer',
       name: `${p.name} plan`,
       price: String(p.priceMonthly),
-      priceCurrency: 'USD',
+      priceCurrency: 'AUD',
       category: p.priceMonthly === 0 ? 'free' : 'subscription',
       url: abs('/pricing'),
     })),

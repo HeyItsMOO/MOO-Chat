@@ -1,16 +1,12 @@
 import Link from 'next/link';
-import Script from 'next/script';
 import type { Metadata } from 'next';
-import { BRAND, APP_URL } from '@/lib/brand';
+import { BRAND } from '@/lib/brand';
 import { pageMeta, softwareAppJsonld } from '@/lib/seo';
 import { JsonLd } from '@/components/site/JsonLd';
 import { CTASection } from '@/components/site/ui';
 import { Reveal } from '@/components/site/Reveal';
 import { Stars } from '@/components/site/Stars';
 import { ChatMockup } from '@/components/site/ChatMockup';
-
-// Public key of the demo tenant created by the seed (fixed, see prisma/seed.ts).
-const DEMO_KEY = 'moo_demo_insuregroup';
 
 export const metadata: Metadata = pageMeta({
   title: `${BRAND.name} — AI chat for your website that captures leads`,
@@ -43,7 +39,7 @@ export default function Landing() {
           </div>
           <div className="mt-5 flex items-center gap-3 text-sm font-bold text-ink-soft">
             <Stars />
-            <span>No credit card · 100 free messages / month</span>
+            <span>No credit card · 5-day Growth trial + free plan</span>
           </div>
         </div>
 
@@ -73,8 +69,8 @@ export default function Landing() {
           <div className="card-moo p-8 text-center">
             <h2 className="font-heading text-2xl font-bold text-cow-black">Try it right now 👉</h2>
             <p className="mt-2 font-bold text-ink-soft">
-              A real assistant is running in the corner of this page (seeded with a sample insurance business).
-              Click the chat bubble and ask it something.
+              Our own {BRAND.name} assistant is running in the corner of this page. Click the chat bubble
+              and ask it anything about {BRAND.name} — pricing, install, features. That&apos;s the product.
             </p>
           </div>
         </Reveal>
@@ -243,8 +239,8 @@ export default function Landing() {
           >
             <div>
               <div className="font-heading text-xs font-bold uppercase tracking-widest text-cow-black">Launch offer</div>
-              <h2 className="mt-1 font-heading text-2xl font-bold text-cow-black">100 AI replies a month — on us.</h2>
-              <p className="mt-1 font-bold text-cow-black/80">No credit card. Upgrade only when you grow.</p>
+              <h2 className="mt-1 font-heading text-2xl font-bold text-cow-black">Try Growth free for 5 days.</h2>
+              <p className="mt-1 font-bold text-cow-black/80">No credit card. Then 50 free replies/month, or upgrade anytime.</p>
             </div>
             <div className="flex gap-3">
               <Link href="/signup" className="btn-dark">Get started</Link>
@@ -276,9 +272,6 @@ export default function Landing() {
       </section>
 
       <CTASection />
-
-      {/* Live demo widget */}
-      <Script src={`${APP_URL}/embed.js`} data-key={DEMO_KEY} strategy="afterInteractive" />
     </main>
   );
 }
@@ -297,7 +290,7 @@ const STATS = [
   { value: '5 min', label: 'to go live' },
   { value: '1 line', label: 'of code to install' },
   { value: '24/7', label: 'instant answers' },
-  { value: '100', label: 'free replies / month' },
+  { value: '5-day', label: 'free Growth trial' },
 ];
 
 const PLATFORMS = ['WordPress', 'Shopify', 'Webflow', 'Wix', 'Squarespace', 'Framer', 'Custom HTML'];
@@ -349,5 +342,5 @@ const FAQ = [
   { q: 'How long does setup take?', a: 'About five minutes. Create an assistant, add your knowledge (or auto-fill from your URL), and paste one script tag.' },
   { q: 'Will it make things up?', a: 'It answers only from the knowledge you provide and defers or hands off when unsure. You set guardrails to keep it on-topic.' },
   { q: 'Does it work on my platform?', a: 'If your site supports a script tag, yes. There are also dedicated WordPress and Shopify installs.' },
-  { q: 'Is there a free plan?', a: 'Yes — 100 AI replies a month, no credit card required. Upgrade only when you need more.' },
+  { q: 'Is there a free plan?', a: 'Yes — 50 free replies a month, no credit card. New accounts also get a 5-day trial of the Growth plan so you can try the full thing first.' },
 ];

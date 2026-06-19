@@ -1,6 +1,7 @@
 import { prisma } from './db';
 import { generatePublicKey, normalizeHost } from './tenant';
 import { DEFAULT_LEAD_FIELDS } from './leadform';
+import { computeTrialEnd } from './plans';
 
 function slugify(input: string): string {
   return (
@@ -76,7 +77,8 @@ export async function provisionTenant(input: ProvisionInput) {
       publicKey: input.publicKey || generatePublicKey(),
       plan: 'free',
       status: 'trialing',
-      trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      // No-card trial of the top plan; always ends on a Monday (>= 5 days).
+      trialEndsAt: computeTrialEnd(),
       assistant: { create: defaultAssistant(input.businessName) },
       memberships: { create: { userId: input.userId, role: 'owner' } },
       allowedDomains: host ? { create: { domain: host } } : undefined,

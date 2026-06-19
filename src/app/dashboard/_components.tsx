@@ -3,14 +3,21 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function LogoutButton() {
+export function LogoutButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
   }
   return (
-    <button onClick={logout} className="mt-2 w-full rounded-lg px-3 py-2 text-left text-sm text-ink-mute hover:bg-slate-100 hover:text-ink">
+    <button
+      onClick={logout}
+      className={
+        compact
+          ? 'rounded-lg border-2 border-cow-black px-3 py-1.5 text-xs font-bold text-cow-black hover:bg-paper'
+          : 'mt-2 w-full rounded-lg px-3 py-2 text-left text-sm text-ink-mute hover:bg-slate-100 hover:text-ink'
+      }
+    >
       Log out
     </button>
   );
