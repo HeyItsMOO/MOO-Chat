@@ -36,8 +36,15 @@ export const BRAND = {
   ],
 };
 
-export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+/** Normalize NEXT_PUBLIC_APP_URL into a valid absolute origin (tolerates a
+ *  scheme-less value like "example.com" by assuming https, and trims trailing slashes). */
+function normalizeAppUrl(raw: string | undefined): string {
+  const trimmed = (raw || '').trim().replace(/\/+$/, '');
+  if (!trimmed) return 'http://localhost:3000';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+export const APP_URL = normalizeAppUrl(process.env.NEXT_PUBLIC_APP_URL);
 
 /** Public key of ChatMOO's own always-on assistant (seeded; answers about ChatMOO). */
 export const SITE_ASSISTANT_KEY = 'chatmoo_site';

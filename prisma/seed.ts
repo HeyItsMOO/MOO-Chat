@@ -89,7 +89,9 @@ New accounts get a 5-day free trial of Growth (no credit card); the trial always
 
 function appHost(): string {
   try {
-    return new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').host.replace(/^www\./, '');
+    const raw = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').trim();
+    const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    return new URL(url).host.replace(/^www\./, '');
   } catch {
     return 'localhost';
   }
