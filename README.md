@@ -1,10 +1,10 @@
-# MOO Chat — by HeyItsMOO
+# ChatMOO — by HeyItsMOO
 
 A multi-tenant SaaS platform that turns one AI chatbot into a product you can sell to
 any store. Each customer ("tenant") gets their own assistant — branding, knowledge base,
 and usage meter — installable on any website with **one script tag**.
 
-> The product name lives in `src/lib/brand.ts` (currently **MOO Chat**, a HeyItsMOO product).
+> The product name lives in `src/lib/brand.ts` (currently **ChatMOO**, a HeyItsMOO product).
 
 > Built from the InsureGroup WordPress chatbot. The original per-site model (each site
 > holds its own AI key) is flipped to a **central gateway**: the platform holds one
@@ -14,13 +14,14 @@ and usage meter — installable on any website with **one script tag**.
 
 ## Quick start (local)
 
+You'll need a **PostgreSQL** database. The fastest path is a free **Neon** branch
+(neon.tech) or **Supabase** — or run Postgres locally. Then:
+
 ```bash
-cd frontdesk
-npm install                      # already done
-cp .env.example .env             # a .env is already created for you
-#  → open .env and paste your ANTHROPIC_API_KEY to enable live AI replies
-npm run db:push                  # create the SQLite database (already done)
-npm run db:seed                  # seed demo data (already done)
+npm install
+cp .env.example .env             # then set DATABASE_URL + ANTHROPIC_API_KEY
+npm run db:push                  # create the tables in your Postgres database
+npm run db:seed                  # seed demo data (admin + InsureGroup demo)
 npm run dev                      # http://localhost:3000
 ```
 
@@ -86,7 +87,7 @@ Customer's website
                                   ▼
         Next.js app (Vercel)  ── /api/v1/widget/*  ── the gateway
                                   │
-                                  ├── Prisma ─► Postgres/SQLite  (tenants, convos, usage)
+                                  ├── Prisma ─► PostgreSQL  (tenants, convos, usage)
                                   └── Anthropic SDK ─► ONE central API key (metered)
 ```
 
@@ -112,13 +113,40 @@ Customer's website
 
 ---
 
-## Going to production (Postgres + Vercel)
+## Marketing site, blog & SEO
 
-1. Create a free Postgres DB at **neon.tech** (or Supabase) and copy the connection string.
-2. In `prisma/schema.prisma`, change `provider = "sqlite"` to `provider = "postgresql"`.
+The public-facing website lives in the `src/app/(marketing)/` route group with a shared
+header/footer (`src/components/site/`). Navigation and the sitemap are both driven from
+`src/lib/site.ts`, so adding a page in one place keeps them in sync.
+
+- **Add a blog post:** drop a Markdown file in `content/blog/` with front-matter
+  (`title`, `description`, `date`, `author`, `tags`). It appears at `/blog/<filename>`.
+- **Add a docs page:** drop a Markdown file in `content/docs/` with front-matter
+  (`title`, `description`, `order`). It appears at `/docs/<filename>` and in the sidebar.
+
+**SEO is centralized:**
+
+- Per-page metadata via `pageMeta()` in `src/lib/seo.ts` (canonical + Open Graph + Twitter).
+- JSON-LD structured data builders in the same file (Organization, WebSite,
+  SoftwareApplication, FAQPage, BreadcrumbList, BlogPosting).
+- `app/robots.ts`, `app/sitemap.ts` (auto-includes blog/docs), and `app/manifest.ts`.
+- Generated icons & social cards: `app/icon.tsx`, `app/apple-icon.tsx`,
+  `app/opengraph-image.tsx`, plus a dynamic image per blog post.
+- Brand defaults (name, description, keywords, social handle) live in `src/lib/brand.ts`.
+  Canonical/OG URLs are built from `NEXT_PUBLIC_APP_URL`, so set it in production.
+
+## Going to production (Vercel)
+
+The repo is Vercel-ready — import it and add env vars. Full runbook in **[DEPLOY.md](./DEPLOY.md)**.
+
+1. Create a free Postgres DB at **neon.tech** (or Supabase / Vercel Postgres) and copy
+   the connection string.
+2. Import the repo in Vercel — the project root is the repo root and Next.js is
+   auto-detected. `vercel.json` pins the build command to `npm run vercel-build`, which
+   runs `prisma generate && prisma db push && next build`, so the schema is created on
+   the first deploy.
 3. Set env vars on Vercel: `DATABASE_URL`, `ANTHROPIC_API_KEY`, `AUTH_SECRET`,
-   `NEXT_PUBLIC_APP_URL` (your deployed URL).
-4. `npx prisma migrate deploy` (or `prisma db push`) against the Postgres URL, then seed.
-5. Deploy to Vercel (`vercel` or connect the Git repo). `npm run build` runs `prisma generate`.
+   `NEXT_PUBLIC_APP_URL` (your deployed URL), plus PayPal/Resend when you enable them.
+4. Deploy. To load the demo/admin data once, run `npm run db:seed` against the Postgres URL.
 
 See `ROADMAP.md` for what's next (billing, lead forms, live chat, auto-setup, WP/Shopify, admin).

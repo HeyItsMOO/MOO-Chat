@@ -1,9 +1,9 @@
 /**
- * Product branding. MOO Chat is a HeyItsMOO product.
+ * Product branding. ChatMOO is a HeyItsMOO product.
  * Change these to re-skin the whole platform from one place.
  */
 export const BRAND = {
-  name: 'MOO Chat',
+  name: 'ChatMOO',
   shortName: 'MOO',
   emoji: '🐄',
   parent: 'HeyItsMOO',
@@ -14,8 +14,30 @@ export const BRAND = {
   // "Powered by" credit shown in the widget (matches the original plugin).
   poweredByText: 'Powered by HeyItsMOO.com',
   poweredByUrl: 'https://heyitsmoo.com',
-  supportEmail: 'hello@heyitsmoo.com',
+  supportEmail: 'Holler@HeyItsMOO.com',
+  // ── SEO / marketing metadata (edit freely) ──
+  // Longer, search-friendly description used as the default meta description.
+  description:
+    'ChatMOO is an AI chat assistant for any website. It answers customer questions from your own content, captures leads, and hands off to your team — installed with one line of code on WordPress, Shopify, or any site.',
+  // Social handle for Twitter/X cards (leave as-is or update to your real handle).
+  twitterHandle: '@heyitsmoo',
+  foundedYear: 2024,
+  keywords: [
+    'AI chatbot',
+    'website chat assistant',
+    'AI customer support',
+    'lead capture chatbot',
+    'live chat software',
+    'WordPress chatbot',
+    'Shopify chatbot',
+    'AI front desk',
+    'customer service automation',
+    'AI website assistant',
+  ],
 };
 
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+
+/** Public key of ChatMOO's own always-on assistant (seeded; answers about ChatMOO). */
+export const SITE_ASSISTANT_KEY = 'chatmoo_site';

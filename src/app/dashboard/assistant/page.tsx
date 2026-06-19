@@ -1,11 +1,11 @@
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan } from '@/lib/plans';
+import { effectivePlan } from '@/lib/plans';
 import AssistantForm from './AssistantForm';
 
 export default async function AssistantPage() {
   const ctx = await getCurrentContext();
   if (!ctx?.tenant?.assistant) return null;
-  const plan = getPlan(ctx.tenant.plan);
+  const plan = effectivePlan(ctx.tenant);
 
   return (
     <div className="max-w-3xl space-y-6">

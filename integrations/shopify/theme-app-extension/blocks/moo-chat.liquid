@@ -1,7 +1,7 @@
 {% comment %}
-  MOO Chat — Shopify app embed block.
+  ChatMOO — Shopify app embed block.
   Merchants toggle this on in Online Store > Themes > Customize > App embeds,
-  then paste their public key. It injects the MOO Chat widget on every page.
+  then paste their public key. It injects the ChatMOO widget on every page.
 {% endcomment %}
 
 {% if block.settings.enabled and block.settings.public_key != blank %}
@@ -13,12 +13,12 @@
 
 {% schema %}
 {
-  "name": "MOO Chat",
+  "name": "ChatMOO",
   "target": "body",
   "settings": [
-    { "type": "checkbox", "id": "enabled", "label": "Enable MOO Chat", "default": true },
-    { "type": "text", "id": "public_key", "label": "Public key", "info": "Find it in your MOO Chat dashboard under Install (starts with moo_)." },
-    { "type": "text", "id": "app_url", "label": "App URL", "default": "https://app.heyitsmoo.com", "info": "Leave as default unless you self-host MOO Chat." }
+    { "type": "checkbox", "id": "enabled", "label": "Enable ChatMOO", "default": true },
+    { "type": "text", "id": "public_key", "label": "Public key", "info": "Find it in your ChatMOO dashboard under Install (starts with moo_)." },
+    { "type": "text", "id": "app_url", "label": "App URL", "default": "https://app.heyitsmoo.com", "info": "Leave as default unless you self-host ChatMOO." }
   ]
 }
 {% endschema %}

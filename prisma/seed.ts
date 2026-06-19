@@ -47,6 +47,46 @@ Premiums are not quoted in this chat. The fastest ways to get a tailored quote a
 - "How much will it cost?" Premiums depend on the business, equipment, claims history and cover required, so a broker prepares a tailored quote — use the Online Quote form or call 1300 983 940.
 - "Are you Australia-wide?" Yes, we arrange cover for businesses across Australia. The office is in Brisbane.`;
 
+// ── ChatMOO's own product assistant (always-on on the marketing site) ──
+const SITE_KEY = 'chatmoo_site';
+
+const CHATMOO_PERSONA =
+  "You are the ChatMOO assistant, embedded on ChatMOO's own website. ChatMOO is an AI chat assistant that any business adds to its website to answer customer questions, capture leads, and hand off to a human. You help visitors understand what ChatMOO does, its pricing, how to install it, and how to get started.\n\n" +
+  "STYLE: Friendly, upbeat, plain-English and lightly playful ('no bull') but professional. Use Australian English and AUD. Keep answers short — usually 2 to 4 sentences. When relevant, point visitors to a page: /pricing, /features, /docs, /integrations, /contact, or /signup.";
+
+const CHATMOO_GUARDRAILS =
+  "1. Only answer questions about ChatMOO and how to use it. If asked something unrelated, politely steer back.\n" +
+  "2. Pricing is in AUD: Free (A$0, 50 replies/mo), Starter (A$49, 2,000), Growth (A$129, 8,000 — most popular), Business (A$349, 30,000). New accounts get a 5-day free trial of Growth, no credit card. Don't invent other prices.\n" +
+  "3. Don't promise features that aren't in the knowledge base. If unsure, point them to /docs or /contact.\n" +
+  "4. Encourage signing up at /signup, and offer the enquiry form for anyone who wants a human to follow up.\n" +
+  "5. Never ask for passwords or payment/card details in chat.";
+
+const CHATMOO_KB = `# What is ChatMOO?
+ChatMOO is an AI chat assistant for any website — a HeyItsMOO product. It answers customer questions from your own content, captures leads, and hands off to your team when needed. Install it with one line of code on WordPress, Shopify, or any site. Live in about 5 minutes.
+
+# Pricing (AUD, per month)
+- Free — A$0 — 50 AI replies/month, lead capture. No credit card.
+- Starter — A$49 — 2,000 replies/month, 1 extra domain.
+- Growth — A$129 — 8,000 replies/month, live chat handoff, remove branding, 3 extra domains. Most popular.
+- Business — A$349 — 30,000 replies/month, all features, 25 extra domains.
+New accounts get a 5-day free trial of Growth (no credit card); the trial always ends on a Monday. Full details: /pricing
+
+# How to install
+1. Sign up at /signup and build your assistant (add your knowledge, or paste your URL to auto-fill it).
+2. Copy your one-line snippet from the dashboard Install page.
+3. Paste it before </body> on your site. There are also WordPress and Shopify installs — see /docs and /integrations.
+
+# Key features
+- Answers from your own knowledge base (it doesn't make things up).
+- Lead capture form with email notifications, an inbox, and CSV export.
+- Live human handoff (Growth and Business plans).
+- On-brand theming — colours, position, welcome message, suggested questions.
+- Guardrails, domain allowlist, rate limits, and monthly usage metering.
+
+# Contact & help
+- Docs: /docs · Pricing: /pricing · Features: /features · Integrations: /integrations
+- Questions or a demo: /contact, or email Holler@HeyItsMOO.com`;
+
 function appHost(): string {
   try {
     return new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').host.replace(/^www\./, '');
@@ -56,21 +96,27 @@ function appHost(): string {
 }
 
 async function main() {
-  const pw = await bcrypt.hash('demo12345', 10);
-  const adminPw = await bcrypt.hash('admin12345', 10);
+  // Credentials are env-configurable so production never ships default passwords.
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@moochat.app').toLowerCase();
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin12345';
+  const demoEmail = (process.env.SEED_DEMO_EMAIL || 'demo@moochat.app').toLowerCase();
+  const demoPassword = process.env.SEED_DEMO_PASSWORD || 'demo12345';
+
+  const pw = await bcrypt.hash(demoPassword, 10);
+  const adminPw = await bcrypt.hash(adminPassword, 10);
 
   // Platform super-admin (you).
-  await prisma.user.upsert({
-    where: { email: 'admin@moochat.app' },
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
     update: {},
-    create: { email: 'admin@moochat.app', name: 'Platform Admin', passwordHash: adminPw, isSuperAdmin: true },
+    create: { email: adminEmail, name: 'Platform Admin', passwordHash: adminPw, isSuperAdmin: true },
   });
 
   // Demo customer.
   const demoUser = await prisma.user.upsert({
-    where: { email: 'demo@moochat.app' },
+    where: { email: demoEmail },
     update: {},
-    create: { email: 'demo@moochat.app', name: 'Demo Owner', passwordHash: pw },
+    create: { email: demoEmail, name: 'Demo Owner', passwordHash: pw },
   });
 
   // Demo tenant: InsureGroup, on the Pro plan so all features are visible.
@@ -150,9 +196,68 @@ async function main() {
     });
   }
 
+  // ── ChatMOO's own always-on assistant (answers about ChatMOO on the site) ──
+  const siteExists = await prisma.tenant.findUnique({ where: { publicKey: SITE_KEY }, include: { assistant: true } });
+  if (!siteExists) {
+    const site = await prisma.tenant.create({
+      data: {
+        name: 'ChatMOO',
+        slug: 'chatmoo-site',
+        websiteUrl: process.env.NEXT_PUBLIC_APP_URL || '',
+        publicKey: SITE_KEY,
+        plan: 'business',
+        status: 'active',
+        assistant: {
+          create: {
+            enabled: true,
+            companyName: 'ChatMOO',
+            headerTitle: 'ChatMOO Assistant',
+            headerSubtitle: 'Ask me anything about ChatMOO',
+            welcomeMessage: "G'day! 🐄 I'm the ChatMOO assistant. Ask me about pricing, install, or features — or I can grab your details for a human.",
+            suggestedQuestions: 'What is ChatMOO?\nHow much does it cost?\nHow do I install it?\nDoes it work on Shopify?',
+            primaryColor: '#16a34a',
+            accentColor: '#facc15',
+            position: 'right',
+            launcherLabel: 'Chat with us 🐄',
+            showPoweredBy: false,
+            contactEmail: 'Holler@HeyItsMOO.com',
+            model: 'claude-haiku-4-5-20251001',
+            maxTokens: 800,
+            persona: CHATMOO_PERSONA,
+            knowledgeBase: CHATMOO_KB,
+            guardrails: CHATMOO_GUARDRAILS,
+            rateLimitPerHour: 60,
+            leadFormEnabled: true,
+            leadFormTitle: 'Talk to a human',
+            leadFormIntro: 'Leave your details and the ChatMOO team will get back to you.',
+            leadFormButtonLabel: 'Send',
+            leadNotifyEmail: 'Holler@HeyItsMOO.com',
+            leadFormFields: JSON.stringify([
+              { key: 'name', label: 'Name', type: 'text', required: true },
+              { key: 'email', label: 'Email', type: 'email', required: true },
+              { key: 'message', label: 'How can we help?', type: 'textarea', required: true },
+            ]),
+          },
+        },
+        memberships: { create: { userId: admin.id, role: 'owner' } },
+      },
+    });
+    for (const domain of Array.from(new Set([appHost(), 'localhost']))) {
+      await prisma.allowedDomain.create({ data: { tenantId: site.id, domain } });
+    }
+    console.log('Seeded ChatMOO site assistant (key', SITE_KEY + ')');
+  } else if (siteExists.assistant) {
+    // Keep the product knowledge fresh on re-seed.
+    await prisma.assistant.update({
+      where: { id: siteExists.assistant.id },
+      data: { persona: CHATMOO_PERSONA, knowledgeBase: CHATMOO_KB, guardrails: CHATMOO_GUARDRAILS },
+    });
+    console.log('ChatMOO site assistant already present — refreshed knowledge.');
+  }
+
   console.log('\nLogins:');
-  console.log('  Customer demo : demo@moochat.app / demo12345');
-  console.log('  Super admin   : admin@moochat.app / admin12345');
+  console.log(`  Customer demo : ${demoEmail} / ${demoPassword}`);
+  console.log(`  Super admin   : ${adminEmail} / ${adminPassword}`);
 }
 
 main()

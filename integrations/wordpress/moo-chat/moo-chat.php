@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       MOO Chat
+ * Plugin Name:       ChatMOO
  * Plugin URI:        https://heyitsmoo.com/
- * Description:       Adds your MOO Chat AI assistant to your WordPress site. Paste your public key and you're live — no code.
+ * Description:       Adds your ChatMOO AI assistant to your WordPress site. Paste your public key and you're live — no code.
  * Version:           1.0.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
@@ -11,7 +11,7 @@
  * License:           GPL-2.0-or-later
  * Text Domain:       moo-chat
  *
- * This is the thin installer: all the AI, config and data live in the MOO Chat
+ * This is the thin installer: all the AI, config and data live in the ChatMOO
  * platform. This plugin only injects the embed snippet with your public key.
  *
  * @package MOO_Chat
@@ -66,7 +66,7 @@ add_action( 'wp_footer', 'moo_chat_enqueue', 99 );
  * Admin settings page.
  */
 function moo_chat_admin_menu() {
-	add_options_page( 'MOO Chat', 'MOO Chat', 'manage_options', 'moo-chat', 'moo_chat_settings_page' );
+	add_options_page( 'ChatMOO', 'ChatMOO', 'manage_options', 'moo-chat', 'moo_chat_settings_page' );
 }
 add_action( 'admin_menu', 'moo_chat_admin_menu' );
 
@@ -94,8 +94,8 @@ function moo_chat_settings_page() {
 	$o = moo_chat_get_options();
 	?>
 	<div class="wrap">
-		<h1>MOO Chat</h1>
-		<p>Add your AI assistant to this site. Find your <strong>public key</strong> in your MOO Chat dashboard under <em>Install</em>.</p>
+		<h1>ChatMOO</h1>
+		<p>Add your AI assistant to this site. Find your <strong>public key</strong> in your ChatMOO dashboard under <em>Install</em>.</p>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'moo_chat_group' ); ?>
 			<table class="form-table" role="presentation">
@@ -111,7 +111,7 @@ function moo_chat_settings_page() {
 					<th scope="row"><label for="moo_chat_url">App URL</label></th>
 					<td>
 						<input type="url" id="moo_chat_url" class="regular-text" name="moo_chat_options[app_url]" value="<?php echo esc_attr( $o['app_url'] ); ?>" placeholder="<?php echo esc_attr( MOO_CHAT_DEFAULT_APP_URL ); ?>" />
-						<p class="description">Leave as default unless you self-host MOO Chat.</p>
+						<p class="description">Leave as default unless you self-host ChatMOO.</p>
 					</td>
 				</tr>
 			</table>

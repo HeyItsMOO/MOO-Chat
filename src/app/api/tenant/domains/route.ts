@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getCurrentContext } from '@/lib/auth';
 import { normalizeHost } from '@/lib/tenant';
-import { getPlan } from '@/lib/plans';
+import { effectivePlan } from '@/lib/plans';
 
 export const runtime = 'nodejs';
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Enter a valid domain, e.g. example.com' }, { status: 400 });
   }
 
-  const plan = getPlan(ctx.tenant.plan);
+  const plan = effectivePlan(ctx.tenant);
   const count = await prisma.allowedDomain.count({ where: { tenantId: ctx.tenant.id } });
   // The primary website host doesn't count against the extra-domain allowance.
   const allowance = 1 + plan.features.extraDomains;
