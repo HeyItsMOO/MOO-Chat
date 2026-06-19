@@ -1,86 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BRAND } from '@/lib/brand';
 import { PRIMARY_NAV } from '@/lib/site';
-import { Stars } from './Stars';
-
-function SocialIcons({ className = '' }: { className?: string }) {
-  return (
-    <span className={`inline-flex items-center gap-3 ${className}`}>
-      <a href={BRAND.parentUrl} target="_blank" rel="noopener" aria-label="Website" className="hover:opacity-100 opacity-80">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
-        </svg>
-      </a>
-      <a href={`https://twitter.com/${BRAND.twitterHandle.replace('@', '')}`} target="_blank" rel="noopener" aria-label="X / Twitter" className="hover:opacity-100 opacity-80">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
-        </svg>
-      </a>
-    </span>
-  );
-}
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const isActive = (href: string) => href !== '/' && pathname?.startsWith(href.replace(/#.*$/, ''));
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <div>
+    <header className="sticky top-0 z-50">
+      {/* Announcement / offer bar */}
+      <div
+        className={`overflow-hidden border-cow-black bg-accent text-center text-xs font-extrabold text-cow-black transition-all duration-300 ${
+          scrolled ? 'max-h-0 border-b-0 py-0 opacity-0' : 'max-h-20 border-b-2 py-2 opacity-100'
+        }`}
+      >
+        <span className="px-3">🚀 LAUNCH OFFER — start free with 100 AI replies / month. No credit card, no bull. 🐄</span>
+      </div>
+
       {/* Top utility bar */}
-      <div className="hidden bg-ink text-slate-300 md:block">
-        <div className="container-x flex h-9 items-center justify-between text-xs">
-          <div className="flex items-center gap-4">
-            <a href={`mailto:${BRAND.supportEmail}`} className="hover:text-white">{BRAND.supportEmail}</a>
-            <span className="text-slate-500">·</span>
-            <span>Set up in 5 minutes</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <Stars className="text-amber-400" />
-              <span className="text-slate-400">Loved by teams</span>
+      <div
+        className={`overflow-hidden bg-cow-black text-white transition-all duration-300 ${
+          scrolled ? 'max-h-0 py-0 opacity-0' : 'max-h-20 opacity-100'
+        }`}
+      >
+        <div className="container-x flex h-9 items-center justify-between text-[11px] font-bold sm:text-xs">
+          <a href={`mailto:${BRAND.supportEmail}`} className="hover:text-accent">✉️ {BRAND.supportEmail}</a>
+          <span className="flex items-center gap-2">
+            <span className="hidden items-center gap-1.5 text-pasture sm:flex">
+              <span className="inline-block h-2 w-2 rounded-full bg-pasture" /> Live in 5 minutes
             </span>
-            <span className="text-slate-500">·</span>
-            <SocialIcons />
-          </div>
+            <span className="hidden text-gray-600 sm:inline">|</span>
+            <Link href="/login" className="font-extrabold hover:text-accent">🔒 Client Login</Link>
+          </span>
         </div>
       </div>
 
       {/* Main nav */}
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+      <nav className="border-b-4 border-pasture bg-white">
         <div className="container-x flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold" onClick={() => setOpen(false)}>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm text-white">
-              {BRAND.emoji}
-            </span>
+          <Link href="/" className="flex items-center gap-2 font-heading text-2xl font-bold text-cow-black" onClick={() => setOpen(false)}>
+            <span>{BRAND.emoji}</span>
             {BRAND.name}
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm text-ink-soft lg:flex">
+          <div className="hidden items-center gap-7 lg:flex">
             {PRIMARY_NAV.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`transition hover:text-ink ${isActive(l.href) ? 'font-medium text-ink' : ''}`}
+                className={`font-heading text-sm font-semibold transition hover:text-cow-black ${
+                  isActive(l.href) ? 'text-cow-black' : 'text-gray-500'
+                }`}
               >
                 {l.label}
               </Link>
             ))}
-          </nav>
+          </div>
 
-          <div className="hidden items-center gap-3 text-sm lg:flex">
-            <Link href="/login" className="font-medium text-ink-soft hover:text-ink">Log in</Link>
-            <Link
-              href="/signup"
-              className="rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-brand-700"
-            >
-              Get started free
-            </Link>
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link href="/login" className="font-heading text-sm font-semibold text-gray-600 hover:text-cow-black">Log in</Link>
+            <Link href="/signup" className="btn-moo text-sm">Start free 🚀</Link>
           </div>
 
           <button
@@ -88,39 +80,35 @@ export function SiteHeader() {
             aria-label="Toggle menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-ink lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border-[3px] border-cow-black text-cow-black lg:hidden"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
             </svg>
           </button>
         </div>
 
         {open && (
-          <div className="border-t border-slate-100 bg-white lg:hidden">
-            <nav className="container-x flex flex-col py-3">
+          <div className="border-t-2 border-dashed border-pasture bg-white lg:hidden">
+            <div className="container-x flex flex-col py-3">
               {PRIMARY_NAV.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-2 py-2.5 text-sm text-ink-soft hover:bg-slate-50 hover:text-ink"
+                  className="rounded-lg px-2 py-2.5 font-heading text-sm font-semibold text-gray-600 hover:bg-paper hover:text-cow-black"
                 >
                   {l.label}
                 </Link>
               ))}
-              <div className="mt-2 flex gap-3 border-t border-slate-100 pt-3">
-                <Link href="/login" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-ink">
-                  Log in
-                </Link>
-                <Link href="/signup" onClick={() => setOpen(false)} className="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
-                  Start free
-                </Link>
+              <div className="mt-2 flex gap-3 border-t-2 border-dashed border-pasture pt-3">
+                <Link href="/login" onClick={() => setOpen(false)} className="btn-ghost flex-1 text-sm">Log in</Link>
+                <Link href="/signup" onClick={() => setOpen(false)} className="btn-moo flex-1 text-sm">Start free</Link>
               </div>
-            </nav>
+            </div>
           </div>
         )}
-      </header>
-    </div>
+      </nav>
+    </header>
   );
 }

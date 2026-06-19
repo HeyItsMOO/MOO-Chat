@@ -38,7 +38,7 @@ export default function BlogIndex() {
               <Link
                 key={p.slug}
                 href={`/blog/${p.slug}`}
-                className="block rounded-2xl border border-slate-100 p-7 shadow-sm transition hover:shadow-md"
+                className="card-moo card-moo-hover block p-7"
               >
                 <div className="flex flex-wrap items-center gap-2 text-xs text-ink-mute">
                   {p.date && <span>{formatDate(p.date)}</span>}

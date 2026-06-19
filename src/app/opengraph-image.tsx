@@ -16,19 +16,23 @@ export default function OpengraphImage() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: 80,
-          background: 'linear-gradient(135deg, #166534 0%, #16a34a 60%, #22c55e 100%)',
-          color: 'white',
+          padding: 70,
+          background: '#f0fdf4',
+          backgroundImage: 'radial-gradient(#4ade80 2px, transparent 2px)',
+          backgroundSize: '44px 44px',
+          border: '18px solid #1a1a1a',
           fontFamily: 'sans-serif',
+          color: '#1a1a1a',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <div
             style={{
               width: 64,
               height: 64,
               borderRadius: 16,
-              background: 'rgba(255,255,255,0.2)',
+              background: '#4ade80',
+              border: '4px solid #1a1a1a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -38,20 +42,25 @@ export default function OpengraphImage() {
           >
             M
           </div>
-          <div style={{ fontSize: 36, fontWeight: 700 }}>{BRAND.name}</div>
+          <div style={{ fontSize: 36, fontWeight: 800 }}>{BRAND.name}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 76, fontWeight: 800, lineHeight: 1.05, maxWidth: 900 }}>
+          <div style={{ display: 'flex', fontSize: 78, fontWeight: 800, lineHeight: 1.05, maxWidth: 980 }}>
             Your website&apos;s AI front desk.
           </div>
-          <div style={{ marginTop: 28, fontSize: 34, color: 'rgba(255,255,255,0.92)', maxWidth: 980 }}>
+          <div style={{ display: 'flex', marginTop: 24, fontSize: 32, fontWeight: 700, color: '#374151', maxWidth: 1000 }}>
             Answers questions, captures leads, and hands off to your team.
           </div>
         </div>
 
-        <div style={{ fontSize: 26, color: 'rgba(255,255,255,0.85)' }}>
-          {`Install with one line of code · a ${BRAND.parent} product`}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', background: '#facc15', border: '3px solid #1a1a1a', borderRadius: 999, padding: '8px 18px', fontSize: 24, fontWeight: 800 }}>
+            Live in 5 min
+          </div>
+          <div style={{ display: 'flex', fontSize: 24, fontWeight: 700, color: '#374151' }}>
+            {`One line of code · a ${BRAND.parent} product`}
+          </div>
         </div>
       </div>
     ),

@@ -42,7 +42,7 @@ export function ContactForm() {
 
   if (status === 'sent') {
     return (
-      <div className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
+      <div className="card-moo bg-pasture-light p-8 text-center">
         <div className="text-3xl">✅</div>
         <h2 className="mt-3 text-xl font-bold text-ink">Thanks — message sent!</h2>
         <p className="mt-2 text-sm text-ink-soft">We&apos;ll get back to you by email shortly.</p>
@@ -51,7 +51,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+    <form onSubmit={submit} className="card-moo p-7">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="text-sm font-medium text-ink-soft">Name</span>
@@ -90,7 +90,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={status === 'sending'}
-        className="mt-5 w-full rounded-xl bg-brand-600 px-4 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+        className="btn-moo mt-5 w-full disabled:opacity-50"
       >
         {status === 'sending' ? 'Sending…' : 'Send message'}
       </button>

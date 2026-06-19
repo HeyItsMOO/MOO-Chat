@@ -13,11 +13,64 @@ body {
 }
 
 body {
-  @apply bg-white text-ink antialiased;
+  @apply text-ink antialiased;
+  background-color: #f0fdf4;
+  background-image: radial-gradient(rgba(74, 222, 128, 0.28) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+.font-heading {
+  font-family: var(--font-fredoka), ui-rounded, system-ui, sans-serif;
 }
 
 .container-x {
   @apply mx-auto w-full max-w-6xl px-5;
+}
+
+/* ── HeyItsMOO neo-brutalist component toolkit ───────────────────── */
+.btn-moo {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border-[3px] border-cow-black bg-pasture px-6 py-3 font-heading font-bold text-cow-black no-underline transition;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+.btn-moo:hover {
+  @apply bg-accent;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #1a1a1a;
+}
+.btn-dark {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border-[3px] border-cow-black bg-cow-black px-6 py-3 font-heading font-bold text-white no-underline transition;
+  box-shadow: 4px 4px 0 #4ade80;
+}
+.btn-dark:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #4ade80;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border-[3px] border-cow-black bg-white px-6 py-3 font-heading font-bold text-cow-black no-underline transition hover:bg-paper;
+}
+.card-moo {
+  @apply rounded-2xl border-4 border-cow-black bg-white transition;
+  box-shadow: 8px 8px 0 #4ade80;
+}
+.card-moo-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 8px 12px 0 #facc15;
+}
+.badge-moo {
+  @apply inline-flex items-center gap-1.5 rounded-full border-2 border-cow-black bg-accent px-4 py-1.5 text-sm font-bold text-cow-black;
+  box-shadow: 2px 2px 0 #1a1a1a;
+}
+.organic-border {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+.highlight-green {
+  @apply inline-block border-[3px] border-cow-black bg-pasture px-3;
+  box-shadow: 3px 3px 0 #1a1a1a;
 }
 
 /* Typographic wrapper for rendered markdown (blog/docs) and legal pages. */

@@ -31,13 +31,13 @@ export default function ContactPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
           {/* Info */}
           <div className="space-y-6">
-            <div className="rounded-2xl border border-slate-100 p-6">
+            <div className="card-moo p-6" style={{ boxShadow: '4px 4px 0 #1a1a1a' }}>
               <h2 className="font-semibold text-ink">Email us</h2>
               <a href={`mailto:${BRAND.supportEmail}`} className="mt-1 inline-block font-medium text-brand-700 hover:underline">
                 {BRAND.supportEmail}
               </a>
             </div>
-            <div className="rounded-2xl border border-slate-100 p-6">
+            <div className="card-moo p-6" style={{ boxShadow: '4px 4px 0 #1a1a1a' }}>
               <h2 className="font-semibold text-ink">Looking for setup help?</h2>
               <p className="mt-1 text-sm text-ink-soft">
                 The <Link href="/docs" className="font-medium text-brand-700 hover:underline">docs</Link> cover
@@ -46,12 +46,12 @@ export default function ContactPage() {
                 common questions.
               </p>
             </div>
-            <div className="rounded-2xl border border-slate-100 p-6">
+            <div className="card-moo p-6" style={{ boxShadow: '4px 4px 0 #1a1a1a' }}>
               <h2 className="font-semibold text-ink">Ready to start?</h2>
               <p className="mt-1 text-sm text-ink-soft">
                 You can create an assistant for free in a few minutes.
               </p>
-              <Link href="/signup" className="mt-3 inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
+              <Link href="/signup" className="btn-moo mt-3 text-sm">
                 Start free
               </Link>
             </div>

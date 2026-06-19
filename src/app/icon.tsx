@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 export const size = { width: 512, height: 512 };
 export const contentType = 'image/png';
 
-// Brand favicon / app icon: a white "M" mark on MOO Chat green.
+// Brand favicon / app icon: cow-black "M" on pasture green.
 export default function Icon() {
   return new ImageResponse(
     (
@@ -14,8 +14,8 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#16a34a',
-          color: 'white',
+          background: '#4ade80',
+          color: '#1a1a1a',
           fontSize: 340,
           fontWeight: 800,
           borderRadius: 96,

@@ -50,7 +50,7 @@ export default function AboutPage() {
       <section className="container-x py-12">
         <div className="grid gap-6 sm:grid-cols-3">
           {VALUES.map((v) => (
-            <div key={v.title} className="rounded-2xl border border-slate-100 p-6 shadow-sm">
+            <div key={v.title} className="card-moo card-moo-hover p-6">
               <div className="text-2xl">{v.icon}</div>
               <h2 className="mt-3 font-semibold text-ink">{v.title}</h2>
               <p className="mt-2 text-sm text-ink-soft">{v.body}</p>
@@ -60,21 +60,21 @@ export default function AboutPage() {
       </section>
 
       <section className="container-x pb-12">
-        <div className="rounded-2xl bg-slate-50 p-8 text-center">
+        <div className="card-moo bg-pasture-light p-8 text-center">
           <h2 className="text-2xl font-bold">Built by {BRAND.parent}</h2>
           <p className="mx-auto mt-2 max-w-2xl text-ink-soft">
             {BRAND.name} is made and operated by {BRAND.parent}. Have a question, a partnership idea, or
             press enquiry? We&apos;d love to hear from you.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="rounded-xl bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700">
+            <Link href="/contact" className="btn-moo">
               Contact us
             </Link>
             <a
               href={BRAND.parentUrl}
               target="_blank"
               rel="noopener"
-              className="rounded-xl border border-slate-200 px-5 py-2.5 font-semibold text-ink hover:bg-white"
+              className="btn-ghost"
             >
               Visit {BRAND.parent} ↗
             </a>

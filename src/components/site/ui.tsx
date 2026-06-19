@@ -13,16 +13,16 @@ export function PageHeader({
   center?: boolean;
 }) {
   return (
-    <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
-      <div className={`container-x pt-14 pb-12 sm:pt-20 ${center ? 'text-center' : ''}`}>
+    <section className="border-b-4 border-dashed border-pasture/70">
+      <div className={`container-x pt-14 pb-12 sm:pt-16 ${center ? 'text-center' : ''}`}>
         <div className={center ? 'mx-auto max-w-3xl' : 'max-w-3xl'}>
           {eyebrow && (
-            <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700">
-              {eyebrow}
-            </span>
+            <div className="mb-4">
+              <span className="badge-moo uppercase tracking-wide">{eyebrow}</span>
+            </div>
           )}
-          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{title}</h1>
-          {subtitle && <p className="mt-5 text-lg text-ink-soft">{subtitle}</p>}
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-cow-black sm:text-5xl">{title}</h1>
+          {subtitle && <p className="mt-5 text-lg font-bold text-ink-soft">{subtitle}</p>}
         </div>
       </div>
     </section>
@@ -39,22 +39,15 @@ export function CTASection({
 }) {
   return (
     <section className="container-x py-16">
-      <div className="rounded-3xl bg-brand-600 px-8 py-14 text-center text-white">
-        <h2 className="text-3xl font-bold">{title}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-brand-100">{subtitle}</p>
+      <div
+        className="organic-border border-4 border-cow-black bg-cow-black px-8 py-14 text-center text-white"
+        style={{ boxShadow: '12px 12px 0 #4ade80' }}
+      >
+        <h2 className="font-heading text-3xl font-bold text-pasture sm:text-4xl">{title}</h2>
+        <p className="mx-auto mt-3 max-w-xl font-bold text-white/80">{subtitle}</p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/signup"
-            className="inline-block rounded-xl bg-white px-6 py-3 font-semibold text-brand-700 hover:bg-brand-50"
-          >
-            Get started free
-          </Link>
-          <Link
-            href="/contact"
-            className="inline-block rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10"
-          >
-            Talk to us
-          </Link>
+          <Link href="/signup" className="btn-moo">Get started free 🚀</Link>
+          <Link href="/contact" className="btn-ghost border-white bg-transparent text-white hover:bg-white/10">Talk to us</Link>
         </div>
       </div>
     </section>

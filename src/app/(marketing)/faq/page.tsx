@@ -73,7 +73,7 @@ export default function FaqPage() {
       />
 
       <section className="container-x pb-6">
-        <div className="mx-auto max-w-3xl divide-y divide-slate-100 rounded-2xl border border-slate-100">
+        <div className="card-moo mx-auto max-w-3xl divide-y divide-cow-black/10">
           {FAQ.map((f) => (
             <details key={f.q} className="group p-6 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-ink">

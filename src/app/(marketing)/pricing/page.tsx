@@ -61,19 +61,18 @@ export default function PricingPage() {
           {PLAN_LIST.map((p) => (
             <div
               key={p.id}
-              className={`flex flex-col rounded-2xl border p-6 ${
-                p.highlight ? 'border-brand-600 shadow-lg ring-1 ring-brand-600' : 'border-slate-200'
-              }`}
+              className={`card-moo flex flex-col p-6 ${p.highlight ? 'bg-pasture-light' : ''}`}
+              style={p.highlight ? { boxShadow: '8px 8px 0 #1a1a1a' } : undefined}
             >
               {p.highlight && (
-                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-700">Most popular</div>
+                <div className="mb-2"><span className="badge-moo text-[11px] uppercase tracking-wide">Most popular</span></div>
               )}
-              <h2 className="text-lg font-bold">{p.name}</h2>
+              <h2 className="font-heading text-lg font-bold">{p.name}</h2>
               <div className="mt-2">
-                <span className="text-4xl font-extrabold">${p.priceMonthly}</span>
+                <span className="font-heading text-4xl font-extrabold">${p.priceMonthly}</span>
                 <span className="text-ink-mute">/mo</span>
               </div>
-              <ul className="mt-4 flex-1 space-y-2 text-sm text-ink-soft">
+              <ul className="mt-4 flex-1 space-y-2 text-sm font-semibold text-ink-soft">
                 <li>✓ {p.messagesPerMonth.toLocaleString()} AI replies / month</li>
                 <li>{p.features.leadCapture ? '✓' : '·'} Lead capture form</li>
                 <li>{p.features.liveChat ? '✓' : '·'} Live chat handoff</li>
@@ -84,12 +83,7 @@ export default function PricingPage() {
                 </li>
                 <li>✓ {p.models.length} AI model tier{p.models.length > 1 ? 's' : ''}</li>
               </ul>
-              <Link
-                href="/signup"
-                className={`mt-6 block rounded-xl px-4 py-2.5 text-center font-semibold ${
-                  p.highlight ? 'bg-brand-600 text-white hover:bg-brand-700' : 'border border-slate-200 hover:bg-slate-50'
-                }`}
-              >
+              <Link href="/signup" className={`mt-6 w-full text-center ${p.highlight ? 'btn-moo' : 'btn-ghost'}`}>
                 {p.priceMonthly === 0 ? 'Start free' : `Choose ${p.name}`}
               </Link>
             </div>
@@ -129,7 +123,7 @@ export default function PricingPage() {
         <h2 className="text-2xl font-bold">Pricing questions</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {PRICING_FAQ.map((f) => (
-            <div key={f.q} className="rounded-2xl border border-slate-100 p-6">
+            <div key={f.q} className="card-moo p-6" style={{ boxShadow: '4px 4px 0 #1a1a1a' }}>
               <h3 className="font-semibold text-ink">{f.q}</h3>
               <p className="mt-2 text-sm text-ink-soft">{f.a}</p>
             </div>

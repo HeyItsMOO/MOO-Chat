@@ -5,6 +5,23 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ── HeyItsMOO brand ──
+        pasture: {
+          DEFAULT: '#4ade80', // pasture green
+          dark: '#22c55e',
+          deep: '#16a34a',
+          light: '#f0fdf4',
+        },
+        accent: {
+          DEFAULT: '#facc15', // accent yellow
+          dark: '#eab308',
+        },
+        cow: {
+          black: '#1a1a1a',
+          white: '#ffffff',
+        },
+        paper: '#f0fdf4',
+        // Kept for existing components.
         brand: {
           DEFAULT: '#16a34a',
           50: '#f0fdf4',
@@ -19,13 +36,23 @@ export default {
           900: '#14532d',
         },
         ink: {
-          DEFAULT: '#0f172a',
-          soft: '#334155',
-          mute: '#64748b',
+          DEFAULT: '#1a1a1a',
+          soft: '#374151',
+          mute: '#6b7280',
         },
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['var(--font-nunito)', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: ['var(--font-fredoka)', 'ui-rounded', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        moo: '4px 4px 0 #1a1a1a',
+        'moo-lg': '8px 8px 0 #1a1a1a',
+        'moo-green': '8px 8px 0 #4ade80',
+        'moo-yellow': '8px 8px 0 #facc15',
+      },
+      borderRadius: {
+        organic: '255px 15px 225px 15px/15px 225px 15px 255px',
       },
     },
   },

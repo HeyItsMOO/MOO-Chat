@@ -29,14 +29,19 @@ export default function FeaturesPage() {
       <section className="container-x pb-8">
         <div className="grid gap-6 md:grid-cols-2">
           {GROUPS.map((g) => (
-            <div key={g.title} className="rounded-2xl border border-slate-100 p-7 shadow-sm">
-              <div className="text-2xl">{g.icon}</div>
-              <h2 className="mt-3 text-xl font-bold text-ink">{g.title}</h2>
-              <p className="mt-2 text-sm text-ink-soft">{g.body}</p>
-              <ul className="mt-4 space-y-2 text-sm text-ink-soft">
+            <div key={g.title} className="card-moo card-moo-hover p-7">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-xl border-[3px] border-cow-black bg-accent text-2xl"
+                style={{ boxShadow: '3px 3px 0 #1a1a1a' }}
+              >
+                {g.icon}
+              </div>
+              <h2 className="mt-3 font-heading text-xl font-bold text-ink">{g.title}</h2>
+              <p className="mt-2 text-sm font-semibold text-ink-soft">{g.body}</p>
+              <ul className="mt-4 space-y-2 text-sm font-semibold text-ink-soft">
                 {g.points.map((p) => (
                   <li key={p} className="flex gap-2">
-                    <span className="text-brand-600">✓</span>
+                    <span className="font-bold text-pasture-deep">✓</span>
                     <span>{p}</span>
                   </li>
                 ))}
@@ -47,7 +52,7 @@ export default function FeaturesPage() {
       </section>
 
       <section className="container-x py-12">
-        <div className="rounded-2xl bg-slate-50 p-8 text-center">
+        <div className="card-moo bg-pasture-light p-8 text-center">
           <h2 className="text-2xl font-bold">Works everywhere your customers are</h2>
           <p className="mx-auto mt-2 max-w-2xl text-ink-soft">
             Install with a single script tag, or use the dedicated WordPress plugin and Shopify app

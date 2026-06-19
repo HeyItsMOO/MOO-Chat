@@ -32,7 +32,7 @@ export default function DocsIndex() {
           <Link
             key={d.slug}
             href={`/docs/${d.slug}`}
-            className="rounded-2xl border border-slate-100 p-6 shadow-sm transition hover:shadow-md"
+            className="card-moo card-moo-hover p-6"
           >
             <div className="text-xs font-semibold text-brand-700">Step {i + 1}</div>
             <h2 className="mt-1 font-semibold text-ink">{d.title}</h2>

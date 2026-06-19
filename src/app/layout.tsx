@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from 'next';
+import { Fredoka, Nunito } from 'next/font/google';
 import './globals.css';
 import { BRAND, APP_URL } from '@/lib/brand';
+
+const fredoka = Fredoka({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-fredoka',
+  display: 'swap',
+});
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '700', '800', '900'],
+  variable: '--font-nunito',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -40,14 +55,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: BRAND.color,
+  themeColor: '#4ade80',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable} scroll-smooth`}>
       <body>{children}</body>
     </html>
   );
