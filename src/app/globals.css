@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  @apply bg-white text-ink antialiased;
+}
+
+.container-x {
+  @apply mx-auto w-full max-w-6xl px-5;
+}

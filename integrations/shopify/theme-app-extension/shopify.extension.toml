@@ -1,0 +1,7 @@
+# Theme app extension config (used by the Shopify CLI when you wrap this in an app).
+# Docs: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
+name = "moo-chat"
+type = "theme"
+
+[capabilities]
+block_only = true

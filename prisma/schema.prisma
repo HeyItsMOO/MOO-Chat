@@ -1,0 +1,210 @@
+// MOO Chat — multi-tenant data model.
+//
+// LOCAL DEV uses SQLite so it runs with zero setup.
+// FOR PRODUCTION: change `provider` to "postgresql" and set DATABASE_URL to your
+// Neon/Supabase connection string, then run `npx prisma migrate deploy`.
+//
+// The schema is intentionally portable: statuses/roles are plain strings and
+// JSON blobs are stored as strings, so the same models work on SQLite and Postgres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Accounts & people ───────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String   @default("")
+  isSuperAdmin Boolean  @default(false) // platform owner (you) — sees all tenants
+  createdAt    DateTime @default(now())
+
+  memberships Membership[]
+}
+
+// A Tenant is one customer account ("store"). Everything is scoped to a tenant.
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  websiteUrl  String   @default("")
+  publicKey   String   @unique // used by the embed widget (safe to expose)
+  plan        String   @default("free") // free | starter | pro | business
+  status      String   @default("trialing") // trialing | active | past_due | suspended
+  trialEndsAt DateTime?
+  createdAt   DateTime @default(now())
+
+  // Billing — PayPal Subscriptions (Stage 2)
+  paypalSubscriptionId String?   @unique
+  paypalPlanId         String?
+  planRenewsAt         DateTime?
+  // (Reserved, unused — kept for an optional future Stripe path.)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+
+  assistant      Assistant?
+  memberships    Membership[]
+  allowedDomains AllowedDomain[]
+  conversations  Conversation[]
+  leads          Lead[]
+  usageCounters  UsageCounter[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      String   @default("owner") // owner | admin | agent
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
+}
+
+// ── The assistant's configuration (1:1 with a tenant) ───────────────
+
+model Assistant {
+  id       String @id @default(cuid())
+  tenantId String @unique
+
+  enabled Boolean @default(true)
+
+  // Brand / appearance
+  companyName    String @default("")
+  headerTitle    String @default("AI Assistant")
+  headerSubtitle String @default("")
+  welcomeMessage String @default("Hi! How can I help you today?")
+  // Newline-separated suggested questions (shown as chips).
+  suggestedQuestions String @default("")
+  primaryColor   String @default("#4f46e5")
+  accentColor    String @default("#22c55e")
+  position       String @default("right") // right | left
+  launcherLabel  String @default("Chat with us")
+  disclaimer     String @default("")
+  showPoweredBy  Boolean @default(true)
+
+  // Contact info surfaced in replies/fallbacks
+  phone        String @default("")
+  contactEmail String @default("")
+
+  // AI behaviour
+  model         String @default("claude-haiku-4-5-20251001")
+  maxTokens     Int    @default(800)
+  // The editable "brain" of the assistant.
+  persona       String @default("")
+  knowledgeBase String @default("")
+  // Extra safety/behaviour rules appended to every system prompt.
+  guardrails    String @default("")
+
+  // Cost / abuse controls
+  rateLimitPerHour Int @default(30)
+
+  // Lead capture form (generalized from the InsureGroup quote form)
+  leadFormEnabled     Boolean @default(true)
+  leadFormTitle       String  @default("Request a quote")
+  leadFormIntro       String  @default("Leave your details and we'll get back to you.")
+  leadFormButtonLabel String  @default("Request a quote")
+  leadFormSuccess     String  @default("Thanks — your details have been sent to our team. We'll be in touch shortly.")
+  // JSON array of field definitions (see src/lib/leadform.ts).
+  leadFormFields      String  @default("[]")
+  // Where lead notifications are emailed (falls back to the tenant owner).
+  leadNotifyEmail     String  @default("")
+
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Origins allowed to embed this tenant's widget. Empty = allow the tenant's
+// own websiteUrl host only (set during onboarding).
+model AllowedDomain {
+  id       String @id @default(cuid())
+  tenantId String
+  domain   String // normalized host, e.g. "example.com"
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, domain])
+  @@index([tenantId])
+}
+
+// ── Conversations & messages ────────────────────────────────────────
+
+model Conversation {
+  id           String   @id @default(cuid())
+  tenantId     String
+  sessionId    String
+  status       String   @default("bot") // bot | waiting | live | closed
+  agent        String   @default("")
+  visitorName  String   @default("")
+  visitorEmail String   @default("")
+  pageUrl      String   @default("")
+  ipHash       String   @default("")
+  userAgent    String   @default("")
+  msgCount     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([tenantId, sessionId])
+  @@index([tenantId, updatedAt])
+  @@index([tenantId, status])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String // user | assistant | agent | system
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+// ── Leads (generalized quote requests) ──────────────────────────────
+
+model Lead {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String   @default("")
+  email     String   @default("")
+  phone     String   @default("")
+  pageUrl   String   @default("")
+  // JSON string of all submitted fields.
+  payload   String   @default("{}")
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}
+
+// ── Usage metering (one row per tenant per month) ───────────────────
+
+model UsageCounter {
+  id           String @id @default(cuid())
+  tenantId     String
+  period       String // "YYYY-MM"
+  messageCount Int    @default(0)
+  tokensIn     Int    @default(0)
+  tokensOut    Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, period])
+  @@index([tenantId])
+}
