@@ -1,9 +1,10 @@
 /**
- * Lightweight website scraper for auto-setup. Fetches a site's homepage (and a
- * few key linked pages), then extracts a company name, description, theme color,
- * and a draft knowledge base — no external dependencies.
+ * Website scraper for auto-setup. Discovers a site's pages (via its sitemap, with
+ * a homepage-link fallback), fetches many of them in parallel, and extracts a
+ * company name, description, theme color, and an in-depth draft knowledge base —
+ * no external dependencies.
  *
- * This is best-effort: it never throws on a bad site, it just returns what it can.
+ * Best-effort: it never throws on a bad site, it just returns what it can.
  */
 
 import dns from 'node:dns/promises';
@@ -18,9 +19,12 @@ export interface SiteInfo {
   error?: string;
 }
 
-const MAX_PAGES = 4;
-const MAX_KB_CHARS = 12000;
-const FETCH_TIMEOUT = 8000;
+const MAX_PAGES = 18; // pages whose text we pull into the knowledge base
+const MAX_CANDIDATES = 120; // URLs we consider before prioritising
+const MAX_KB_CHARS = 35000; // overall knowledge-base size cap
+const PER_PAGE_CHARS = 2400; // text pulled per page
+const FETCH_TIMEOUT = 7000;
+const CONCURRENCY = 6; // parallel fetches
 const MAX_URL_LEN = 2048;
 const MAX_REDIRECTS = 4;
 
@@ -83,10 +87,12 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-async function fetchHtml(url: string): Promise<string | null> {
+/**
+ * Fetch a document (HTML or XML), following redirects manually so the host is
+ * re-validated on every hop. Returns the body text or null.
+ */
+async function fetchDoc(url: string, allowTypes: string[]): Promise<string | null> {
   let current = url;
-  // Follow redirects MANUALLY so we can re-validate the host on every hop
-  // (a public URL could 30x-redirect to an internal/metadata address).
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     let u: URL;
     try {
@@ -103,7 +109,7 @@ async function fetchHtml(url: string): Promise<string | null> {
     try {
       res = await fetch(current, {
         signal: ctrl.signal,
-        headers: { 'User-Agent': 'MOOChatBot/1.0 (+autosetup)', Accept: 'text/html' },
+        headers: { 'User-Agent': 'ChatMOOBot/1.0 (+autosetup)', Accept: 'text/html,application/xhtml+xml,application/xml' },
         redirect: 'manual',
       });
     } catch {
@@ -123,13 +129,16 @@ async function fetchHtml(url: string): Promise<string | null> {
       continue; // re-validate the next hop's host
     }
     if (!res.ok) return null;
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('text/html')) return null;
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (!allowTypes.some((t) => ct.includes(t))) return null;
     const text = await res.text();
-    return text.slice(0, 400_000);
+    return text.slice(0, 600_000);
   }
   return null; // too many redirects
 }
+
+const fetchHtml = (url: string) => fetchDoc(url, ['text/html']);
+const fetchXml = (url: string) => fetchDoc(url, ['xml', 'text/plain', 'text/html']);
 
 function meta(html: string, name: string): string {
   const re = new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]*content=["']([^"']+)["']`, 'i');
@@ -167,28 +176,96 @@ function visibleText(html: string): string {
 }
 
 function cleanCompanyName(raw: string): string {
-  // "Acme Co — Best widgets in town" → "Acme Co"
   return raw.split(/\s[|\-–—:]\s/)[0].trim().slice(0, 80);
 }
 
-function internalLinks(html: string, base: URL): string[] {
+// Skip asset / binary URLs — we only want readable pages.
+const ASSET_RE = /\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|mjs|json|pdf|zip|gz|mp4|mov|mp3|wav|woff2?|ttf|eot|xml|rss|txt)(\?|#|$)/i;
+// Pages most likely to hold useful business info — fetched first.
+const PRIORITY_RE = /(about|service|product|pricing|price|plan|faq|contact|cover|solution|feature|how-it-works|team|company|shop|menu|book|quote|support|help)/i;
+
+function sameHostPageUrls(urls: string[], base: URL): string[] {
+  const seen = new Set<string>();
   const out: string[] = [];
-  const re = /<a[^>]+href=["']([^"']+)["']/gi;
-  let m: RegExpExecArray | null;
-  const wanted = /(about|service|product|faq|pricing|contact|cover|solution)/i;
-  while ((m = re.exec(html)) && out.length < 12) {
+  for (const raw of urls) {
     try {
-      const href = new URL(m[1], base);
-      if (href.host !== base.host) continue;
-      if (href.hash) href.hash = '';
-      const s = href.toString();
-      if (s === base.toString()) continue;
-      if (wanted.test(href.pathname) && !out.includes(s)) out.push(s);
+      const u = new URL(raw, base);
+      if (u.host !== base.host) continue;
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') continue;
+      if (ASSET_RE.test(u.pathname)) continue;
+      u.hash = '';
+      const s = u.toString();
+      if (seen.has(s)) continue;
+      seen.add(s);
+      out.push(s);
+      if (out.length >= MAX_CANDIDATES) break;
     } catch {
       /* skip */
     }
   }
-  return out.slice(0, MAX_PAGES - 1);
+  return out;
+}
+
+/** Discover the site's URLs from its sitemap(s); falls back to homepage links. */
+async function discoverUrls(base: URL, homeHtml: string): Promise<string[]> {
+  const candidates: string[] = [];
+
+  // 1) Sitemaps (covers WordPress's /wp-sitemap.xml and /sitemap_index.xml).
+  const sitemapPaths = ['/sitemap.xml', '/sitemap_index.xml', '/wp-sitemap.xml', '/sitemap-index.xml', '/sitemap1.xml'];
+  for (const path of sitemapPaths) {
+    const xml = await fetchXml(new URL(path, base).toString());
+    if (!xml) continue;
+    const locs = [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => decodeEntities(m[1]));
+    // A sitemap index points to child sitemaps (more .xml files) — expand a few.
+    const childSitemaps = locs.filter((l) => /\.xml(\?|#|$)/i.test(l)).slice(0, 6);
+    for (const child of childSitemaps) {
+      const cx = await fetchXml(child);
+      if (cx) for (const m of cx.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) candidates.push(decodeEntities(m[1]));
+      if (candidates.length >= MAX_CANDIDATES) break;
+    }
+    for (const l of locs) if (!/\.xml(\?|#|$)/i.test(l)) candidates.push(l);
+    if (candidates.length) break; // found a usable sitemap
+  }
+
+  // 2) Always also include links found on the homepage.
+  const hrefs = [...homeHtml.matchAll(/<a[^>]+href=["']([^"'#]+)["']/gi)].map((m) => m[1]);
+  candidates.push(...hrefs);
+
+  return sameHostPageUrls(candidates, base);
+}
+
+/** Prioritise info-rich pages, prefer shallow paths, cap to MAX_PAGES. */
+function prioritise(urls: string[], homeUrl: string): string[] {
+  const ranked = urls
+    .filter((u) => u !== homeUrl)
+    .map((u) => {
+      let path = '/';
+      try {
+        path = new URL(u).pathname;
+      } catch {
+        /* keep default */
+      }
+      const depth = path.split('/').filter(Boolean).length;
+      const score = (PRIORITY_RE.test(path) ? 0 : 100) + depth; // lower is better
+      return { u, score };
+    })
+    .sort((a, b) => a.score - b.score);
+  return ranked.slice(0, MAX_PAGES - 1).map((r) => r.u);
+}
+
+/** Run async work over items with a concurrency limit. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = next++;
+      if (i >= items.length) break;
+      results[i] = await fn(items[i]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
 }
 
 export async function scrapeSite(rawUrl: string): Promise<SiteInfo> {
@@ -204,23 +281,29 @@ export async function scrapeSite(rawUrl: string): Promise<SiteInfo> {
   const description = meta(homeHtml, 'description') || meta(homeHtml, 'og:description') || '';
   const themeColor = meta(homeHtml, 'theme-color') || '';
 
-  const sections: string[] = [];
-  sections.push(`# About ${companyName}\n${description || visibleText(homeHtml).slice(0, 1500)}`);
-
-  const links = internalLinks(homeHtml, base);
-  const pagesFetched = [url];
-  for (const link of links) {
+  // Discover the rest of the site and fetch the best pages in parallel.
+  const discovered = await discoverUrls(base, homeHtml);
+  const toFetch = prioritise(discovered, url);
+  const fetched = await mapLimit(toFetch, CONCURRENCY, async (link) => {
     const html = await fetchHtml(link);
-    if (!html) continue;
-    pagesFetched.push(link);
-    const t = titleOf(html) || link;
-    const body = visibleText(html).slice(0, 2500);
-    if (body) sections.push(`# ${t}\n(${link})\n${body}`);
+    if (!html) return null;
+    const body = visibleText(html).slice(0, PER_PAGE_CHARS);
+    if (!body || body.length < 80) return null;
+    return { link, title: titleOf(html) || link, body };
+  });
+
+  const sections: string[] = [];
+  sections.push(`# About ${companyName}\n${description || visibleText(homeHtml).slice(0, 1800)}`);
+  const pagesFetched = [url];
+  for (const page of fetched) {
+    if (!page) continue;
+    pagesFetched.push(page.link);
+    sections.push(`# ${page.title}\n(${page.link})\n${page.body}`);
   }
 
   let knowledgeBase = sections.join('\n\n').slice(0, MAX_KB_CHARS).trim();
   knowledgeBase +=
-    '\n\n# Note\n(This knowledge base was auto-generated from the website — review and tidy it: remove menus/cookie notices, add FAQs, hours, and contact details.)';
+    `\n\n# Note\n(Auto-generated from ${pagesFetched.length} page(s) on ${base.hostname}. Review and tidy: remove repeated menus/cookie notices, then add FAQs, hours, and contact details.)`;
 
   return {
     ok: true,
