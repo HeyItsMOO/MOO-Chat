@@ -44,20 +44,21 @@ export function formatMoney(cents: number): string {
 
 /** Allocate (once) and return a tenant's own shareable referral code. */
 export async function ensureReferralCode(tenantId: string): Promise<string> {
-  const existing = await prisma.tenant.findUnique({
-    where: { id: tenantId },
-    select: { referralCode: true },
-  });
-  if (existing?.referralCode) return existing.referralCode;
+  const existing = await prisma.referralCode.findUnique({ where: { tenantId } });
+  if (existing) return existing.code;
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const code = generateReferralCode();
     try {
       // eslint-disable-next-line no-await-in-loop
-      await prisma.tenant.update({ where: { id: tenantId }, data: { referralCode: code } });
-      return code;
+      const created = await prisma.referralCode.create({ data: { code, tenantId } });
+      return created.code;
     } catch {
-      // Unique collision (astronomically rare) — try another code.
+      // Collision on code (PK) or tenantId (unique). If another request just
+      // allocated this tenant's code, use it; otherwise try a fresh code.
+      // eslint-disable-next-line no-await-in-loop
+      const now = await prisma.referralCode.findUnique({ where: { tenantId } });
+      if (now) return now.code;
     }
   }
   throw new Error('Could not allocate a referral code.');
@@ -76,16 +77,13 @@ export async function recordReferral(opts: {
   try {
     const code = normalizeRefCode(opts.code);
     if (!code) return;
-    const referrer = await prisma.tenant.findUnique({
-      where: { referralCode: code },
-      select: { id: true },
-    });
-    if (!referrer || referrer.id === opts.referredTenantId) return;
+    const owner = await prisma.referralCode.findUnique({ where: { code } });
+    if (!owner || owner.tenantId === opts.referredTenantId) return;
 
     await prisma.referral.create({
       data: {
         code,
-        referrerId: referrer.id,
+        referrerId: owner.tenantId,
         referredId: opts.referredTenantId,
         referredName: opts.referredName.slice(0, 120),
         commissionCents: REFERRAL_COMMISSION_CENTS,
