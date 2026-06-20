@@ -55,6 +55,8 @@ export async function GET(req: NextRequest) {
         poweredByText: showPoweredBy ? BRAND.poweredByText : '',
         poweredByUrl: BRAND.poweredByUrl,
         liveChat: plan.features.liveChat,
+        // Tenant's own scripts, injected on their site (higher tiers only).
+        customScripts: plan.features.customScripts ? a.customScripts || '' : '',
         leadForm:
           plan.features.leadCapture && a.leadFormEnabled
             ? {

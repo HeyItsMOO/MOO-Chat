@@ -30,6 +30,7 @@ const schema = z.object({
   launcherLabel: z.string().max(60).optional(),
   disclaimer: z.string().max(500).optional(),
   showPoweredBy: z.boolean().optional(),
+  customScripts: z.string().max(20000).optional(),
   phone: z.string().max(60).optional(),
   contactEmail: z.string().max(160).optional(),
   model: z.string().max(80).optional(),
@@ -73,6 +74,11 @@ export async function POST(req: NextRequest) {
   // Free plan can't remove branding.
   if (data.showPoweredBy === false && !effectivePlan(ctx.tenant).features.removeBranding) {
     data.showPoweredBy = true;
+  }
+
+  // Custom scripts are a higher-tier feature; ignore the field on plans without it.
+  if (data.customScripts !== undefined && !effectivePlan(ctx.tenant).features.customScripts) {
+    delete data.customScripts;
   }
 
   // The DB stores fields as a JSON string; serialize the array if provided.

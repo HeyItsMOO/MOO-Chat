@@ -16,12 +16,14 @@ export default function AssistantForm({
   assistant,
   allowedModels,
   canRemoveBranding,
+  canCustomScripts,
   planName,
   websiteUrl,
 }: {
   assistant: Assistant;
   allowedModels: string[];
   canRemoveBranding: boolean;
+  canCustomScripts: boolean;
   planName: string;
   websiteUrl: string;
 }) {
@@ -39,6 +41,7 @@ export default function AssistantForm({
     launcherLabel: assistant.launcherLabel,
     disclaimer: assistant.disclaimer,
     showPoweredBy: assistant.showPoweredBy,
+    customScripts: assistant.customScripts,
     phone: assistant.phone,
     contactEmail: assistant.contactEmail,
     model: assistant.model,
@@ -198,6 +201,29 @@ export default function AssistantForm({
               disabled={!canRemoveBranding}
               hint={canRemoveBranding ? undefined : `Upgrade from ${planName} to hide the credit.`}
             />
+
+            {/* Custom scripts — injected on the customer's site alongside the widget. */}
+            <div className="border-t border-slate-200 pt-5">
+              <Label>Custom scripts</Label>
+              <p className="mt-1 text-xs text-ink-mute">
+                Paste your own <code>&lt;script&gt;</code> tags (analytics, pixels, chat, integrations). They load on
+                your site alongside the widget. Only add code you trust — it runs on your visitors&apos; browsers.
+              </p>
+              {canCustomScripts ? (
+                <textarea
+                  rows={6}
+                  value={form.customScripts}
+                  onChange={(e) => set('customScripts', e.target.value)}
+                  placeholder={'<!-- e.g. analytics -->\n<script src="https://example.com/script-one.js" async></script>\n<script>/* your second custom script */</script>'}
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 font-mono text-xs outline-none focus:border-brand-600"
+                />
+              ) : (
+                <div className="mt-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-xs text-ink-soft">
+                  🔒 Custom scripts are available on the Growth plan and up. Upgrade from {planName} to add your own
+                  scripts.
+                </div>
+              )}
+            </div>
           </>
         )}
 

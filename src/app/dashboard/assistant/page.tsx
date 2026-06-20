@@ -17,6 +17,7 @@ export default async function AssistantPage() {
         assistant={ctx.tenant.assistant}
         allowedModels={plan.models}
         canRemoveBranding={plan.features.removeBranding}
+        canCustomScripts={plan.features.customScripts}
         planName={plan.name}
         websiteUrl={ctx.tenant.websiteUrl}
       />

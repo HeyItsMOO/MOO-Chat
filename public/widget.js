@@ -65,6 +65,37 @@
   function loadCursor() { try { return localStorage.getItem(CURSOR_STORAGE) || null; } catch (e) { return null; } }
   function saveCursor(id) { try { if (id) localStorage.setItem(CURSOR_STORAGE, id); } catch (e) {} }
 
+  function whenReady(cb) {
+    if (document.body) cb();
+    else document.addEventListener('DOMContentLoaded', cb);
+  }
+
+  // Inject the tenant's own custom scripts (set by the account owner for THEIR
+  // site). innerHTML won't run <script> tags, so re-create them so they execute;
+  // other nodes (pixels, <noscript>, divs) are appended to the body as-is.
+  var scriptsInjected = false;
+  function injectCustomScripts(raw) {
+    if (scriptsInjected || !raw) return;
+    scriptsInjected = true;
+    try {
+      var tpl = document.createElement('template');
+      tpl.innerHTML = raw;
+      var src = tpl.content ? tpl.content.childNodes : tpl.childNodes;
+      var nodes = [];
+      for (var i = 0; i < src.length; i++) nodes.push(src[i]);
+      nodes.forEach(function (node) {
+        if (node.nodeType === 1 && node.tagName === 'SCRIPT') {
+          var s = document.createElement('script');
+          for (var a = 0; a < node.attributes.length; a++) s.setAttribute(node.attributes[a].name, node.attributes[a].value);
+          if (node.textContent) s.textContent = node.textContent;
+          document.head.appendChild(s);
+        } else if (document.body) {
+          document.body.appendChild(node);
+        }
+      });
+    } catch (e) { /* never break the host site */ }
+  }
+
   // ── icons (from the reference widget) ──────────────────────────
   function chatIcon() { return '<svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
   function closeIcon() { return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'; }
@@ -394,8 +425,10 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok || !data.enabled) return;
-      if (document.body) build(data.config);
-      else window.addEventListener('DOMContentLoaded', function () { build(data.config); });
+      whenReady(function () {
+        injectCustomScripts(data.config.customScripts);
+        build(data.config);
+      });
     })
     .catch(function () { /* silent — never break the host site */ });
 

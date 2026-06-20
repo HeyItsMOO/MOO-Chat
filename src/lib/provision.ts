@@ -1,7 +1,9 @@
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { generatePublicKey, normalizeHost } from './tenant';
 import { DEFAULT_LEAD_FIELDS } from './leadform';
-import { computeTrialEnd } from './plans';
+import { computeTrialEnd, PLANS, type PlanId } from './plans';
 
 function slugify(input: string): string {
   return (
@@ -87,4 +89,58 @@ export async function provisionTenant(input: ProvisionInput) {
   });
 
   return tenant;
+}
+
+interface ProvisionAccountInput {
+  email: string;
+  password?: string;
+  name?: string;
+  businessName: string;
+  websiteUrl?: string;
+  plan?: string;
+}
+
+/**
+ * Create (or attach to an existing user) a fully-active tenant — used by
+ * external billing systems (e.g. the WHMCS module) that handle payment
+ * themselves, so there's no trial and the status starts "active".
+ *
+ * Idempotent-ish: if the email already has an account we attach a new tenant to
+ * that user (so one client can own several ChatMOO stores).
+ */
+export async function provisionAccount(input: ProvisionAccountInput) {
+  const email = input.email.trim().toLowerCase();
+  if (!email) throw new Error('email is required');
+
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    // If no password is supplied the client signs in via SSO; set a random one
+    // so the account can never be logged into with a guessable credential.
+    const plain = input.password || crypto.randomBytes(24).toString('hex');
+    user = await prisma.user.create({
+      data: { email, name: input.name || '', passwordHash: await bcrypt.hash(plain, 10) },
+    });
+  }
+
+  const plan: PlanId = input.plan && (input.plan as PlanId) in PLANS ? (input.plan as PlanId) : 'starter';
+  const slug = await uniqueSlug(input.businessName || email);
+  const host = normalizeHost(input.websiteUrl || '');
+
+  const tenant = await prisma.tenant.create({
+    data: {
+      name: input.businessName || email,
+      slug,
+      websiteUrl: input.websiteUrl || '',
+      publicKey: generatePublicKey(),
+      plan,
+      status: 'active', // billed externally (WHMCS) — no trial
+      trialEndsAt: null,
+      assistant: { create: defaultAssistant(input.businessName || email) },
+      memberships: { create: { userId: user.id, role: 'owner' } },
+      allowedDomains: host ? { create: { domain: host } } : undefined,
+    },
+    include: { assistant: true },
+  });
+
+  return { user, tenant };
 }
