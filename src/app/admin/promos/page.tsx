@@ -28,6 +28,7 @@ export default async function AdminPromosPage() {
       </div>
       <p className="text-sm text-ink-soft">
         Create codes that grant free time (extended trial or a comped plan), a percentage discount, or account credit.
+        Percent-off and credit codes are automatically converted into the equivalent free time (shown as ≈ free days).
         Customers redeem them at signup or on their billing page; each tenant can use a given code once.
       </p>
       <PromoManager codes={rows} />
