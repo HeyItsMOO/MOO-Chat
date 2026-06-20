@@ -49,7 +49,12 @@ export default function LoginPage() {
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
         </label>
         <label className="block">
-          <span className="text-sm font-bold text-ink-soft">Password</span>
+          <span className="flex items-center justify-between text-sm font-bold text-ink-soft">
+            Password
+            <Link href="/forgot-password" className="text-xs font-semibold text-pasture-deep underline underline-offset-2 hover:text-cow-black">
+              Forgot password?
+            </Link>
+          </span>
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
         </label>
 
