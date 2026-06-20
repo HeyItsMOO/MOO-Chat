@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-type State = 'init' | 'hidden' | 'shown';
+type State = 'init' | 'static' | 'hidden' | 'shown';
 
 /**
  * Fades + lifts children into view on scroll using IntersectionObserver.
- * Progressive enhancement: server renders with no animation classes (content
- * visible), so it's safe without JS and for reduced-motion users.
+ *
+ * Progressive enhancement: the server renders with no animation classes (content
+ * visible), so it's safe without JS and for reduced-motion users. Content that
+ * is already in (or above) the viewport at mount is shown immediately with NO
+ * animation — otherwise above-the-fold content flashes hidden then re-animates
+ * on every load, which reads as the page "jumping" on first paint / scroll.
  */
 export function Reveal({
   children,
@@ -22,16 +26,24 @@ export function Reveal({
   const [state, setState] = useState<State>('init');
 
   useEffect(() => {
-    const reduce =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || typeof IntersectionObserver === 'undefined') {
-      setState('shown');
-      return;
-    }
-    setState('hidden');
     const el = ref.current;
     if (!el) return;
+
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || typeof IntersectionObserver === 'undefined') {
+      setState('static');
+      return;
+    }
+
+    // Already visible (or scrolled past) at mount → no entrance animation.
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (el.getBoundingClientRect().top < vh * 0.92) {
+      setState('static');
+      return;
+    }
+
+    // Below the fold → hide, then reveal once scrolled into view.
+    setState('hidden');
     const obs = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

@@ -36,9 +36,14 @@ export default async function AdminPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Platform overview</h1>
-        <Link href="/admin/promos" className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
-          Promo codes →
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/referrals" className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">
+            Referrals →
+          </Link>
+          <Link href="/admin/promos" className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
+            Promo codes →
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">

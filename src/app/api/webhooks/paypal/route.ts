@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyWebhookSignature, getSubscription } from '@/lib/paypal';
 import { planFromPaypalPlanId } from '@/lib/plans';
+import { markReferralEarned } from '@/lib/referral';
 
 export const runtime = 'nodejs';
 
@@ -97,6 +98,8 @@ export async function POST(req: NextRequest) {
             planRenewsAt: sub.billing_info?.next_billing_time ? new Date(sub.billing_info.next_billing_time) : tenant.planRenewsAt,
           },
         });
+        // A referred tenant just became a paying customer → commission earned.
+        await markReferralEarned(tenant.id);
       } else {
         // Intermediate state (e.g. APPROVAL_PENDING) — update plan metadata only.
         await prisma.tenant.update({ where: { id: tenant.id }, data: { paypalPlanId: sub.plan_id } });

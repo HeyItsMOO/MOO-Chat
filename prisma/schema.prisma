@@ -261,3 +261,38 @@ model PromoRedemption {
   @@index([tenantId])
   @@index([codeId])
 }
+
+// ── Referrals / affiliate program ───────────────────────────────────
+
+// A tenant's own shareable referral code. Kept in its own table (rather than a
+// unique column on Tenant) so adding it is a pure additive migration — adding a
+// unique constraint to the existing Tenant table trips `prisma db push`'s
+// data-loss guard, which fails the non-interactive deploy. Allocated lazily the
+// first time the tenant opens the "Refer & earn" page.
+model ReferralCode {
+  code      String   @id // the shareable code (primary key ⇒ unique)
+  tenantId  String   @unique // one code per tenant
+  createdAt DateTime @default(now())
+}
+
+// When a new tenant signs up via someone's referral code, we record a Referral
+// for the referrer. It starts "pending" and becomes "earned" (a payable
+// commission) once the referred tenant becomes a paying customer. The platform
+// owner marks it "paid" from the admin once they've paid the affiliate out.
+model Referral {
+  id              String    @id @default(cuid())
+  code            String // the referral code used at signup
+  referrerId      String // tenant that earns the commission
+  referredId      String    @unique // tenant that signed up (one referral each)
+  referredName    String    @default("") // snapshot for the referrer's list
+  status          String    @default("pending") // pending | earned | paid | void
+  commissionCents Int       @default(0)
+  currency        String    @default("AUD")
+  createdAt       DateTime  @default(now())
+  earnedAt        DateTime?
+  paidAt          DateTime?
+
+  @@index([referrerId])
+  @@index([code])
+  @@index([status])
+}
