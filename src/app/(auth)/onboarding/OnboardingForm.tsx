@@ -10,6 +10,7 @@ export default function OnboardingForm() {
   const router = useRouter();
   const [businessName, setBusinessName] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [promoCode, setPromoCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -20,12 +21,17 @@ export default function OnboardingForm() {
     const res = await fetch('/api/tenant/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ businessName, websiteUrl }),
+      body: JSON.stringify({ businessName, websiteUrl, promoCode }),
     });
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || 'Something went wrong.');
       setLoading(false);
+      return;
+    }
+    // A bad promo code shouldn't block onboarding — carry a note to the dashboard.
+    if (data.promoError) {
+      router.push('/dashboard/billing?promo=' + encodeURIComponent(data.promoError));
       return;
     }
     router.push('/dashboard');
@@ -40,6 +46,15 @@ export default function OnboardingForm() {
       <label className="block">
         <span className="text-sm font-bold text-ink-soft">Website (optional)</span>
         <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com" className={inputClass} />
+      </label>
+      <label className="block">
+        <span className="text-sm font-bold text-ink-soft">Promo code (optional)</span>
+        <input
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+          placeholder="MOO30"
+          className={inputClass + ' uppercase tracking-wide'}
+        />
       </label>
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</p>}
       <button type="submit" disabled={loading} className="btn-moo w-full disabled:opacity-50">
