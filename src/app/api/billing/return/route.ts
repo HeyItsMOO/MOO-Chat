@@ -4,6 +4,7 @@ import { getCurrentContext } from '@/lib/auth';
 import { APP_URL } from '@/lib/brand';
 import { getSubscription } from '@/lib/paypal';
 import { planFromPaypalPlanId } from '@/lib/plans';
+import { markReferralEarned } from '@/lib/referral';
 
 export const runtime = 'nodejs';
 
@@ -42,6 +43,8 @@ export async function GET(req: NextRequest) {
           planRenewsAt: sub.billing_info?.next_billing_time ? new Date(sub.billing_info.next_billing_time) : null,
         },
       });
+      // First paid activation → any referral commission for this tenant is earned.
+      await markReferralEarned(ctx.tenant.id);
       return NextResponse.redirect(`${APP_URL}/dashboard/billing?upgraded=1`);
     }
     // Approved but not yet active — webhook will finish it.

@@ -56,6 +56,11 @@ model Tenant {
   discountPercent Int       @default(0)
   discountUntil   DateTime?
 
+  // Referral / affiliate program (see Referral). referralCode is this tenant's
+  // own shareable code; it's allocated lazily the first time they open the
+  // "Refer & earn" page.
+  referralCode    String?   @unique
+
   assistant      Assistant?
   memberships    Membership[]
   allowedDomains AllowedDomain[]
@@ -260,4 +265,27 @@ model PromoRedemption {
   @@unique([codeId, tenantId])
   @@index([tenantId])
   @@index([codeId])
+}
+
+// ── Referrals / affiliate program ───────────────────────────────────
+// When a new tenant signs up via someone's referral code, we record a Referral
+// for the referrer. It starts "pending" and becomes "earned" (a payable
+// commission) once the referred tenant becomes a paying customer. The platform
+// owner marks it "paid" from the admin once they've paid the affiliate out.
+model Referral {
+  id              String    @id @default(cuid())
+  code            String // the referral code used at signup
+  referrerId      String // tenant that earns the commission
+  referredId      String    @unique // tenant that signed up (one referral each)
+  referredName    String    @default("") // snapshot for the referrer's list
+  status          String    @default("pending") // pending | earned | paid | void
+  commissionCents Int       @default(0)
+  currency        String    @default("AUD")
+  createdAt       DateTime  @default(now())
+  earnedAt        DateTime?
+  paidAt          DateTime?
+
+  @@index([referrerId])
+  @@index([code])
+  @@index([status])
 }
