@@ -1,8 +1,9 @@
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan, effectivePlan, isTrialActive, trialDaysLeft } from '@/lib/plans';
+import { getPlan, effectivePlan, isTrialActive, trialDaysLeft, CURRENCY_SYMBOL } from '@/lib/plans';
 import { getUsage } from '@/lib/usage';
 import { PAYPAL_CONFIGURED } from '@/lib/paypal';
 import { BillingPlans } from './BillingPlans';
+import { PromoRedeem } from './PromoRedeem';
 
 const BANNERS: Record<string, { text: string; tone: 'ok' | 'warn' | 'err' }> = {
   upgraded: { text: '🎉 You’re upgraded! Your new plan is active.', tone: 'ok' },
@@ -84,11 +85,24 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         </div>
       )}
 
+      {(tenant.creditCents > 0 || (tenant.discountPercent > 0 && tenant.discountUntil && new Date(tenant.discountUntil) > new Date())) && (
+        <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+          {tenant.creditCents > 0 && (
+            <div>🎁 Account credit: <strong>{CURRENCY_SYMBOL}{(tenant.creditCents / 100).toFixed(2)}</strong></div>
+          )}
+          {tenant.discountPercent > 0 && tenant.discountUntil && new Date(tenant.discountUntil) > new Date() && (
+            <div>🏷️ <strong>{tenant.discountPercent}% off</strong> active until {new Date(tenant.discountUntil).toLocaleDateString()}.</div>
+          )}
+        </div>
+      )}
+
       <BillingPlans
         actualPlanId={actualPlan.id}
         paypalConfigured={PAYPAL_CONFIGURED}
         hasSubscription={!!tenant.paypalSubscriptionId}
       />
+
+      <PromoRedeem initialError={sp.promo || ''} />
     </div>
   );
 }

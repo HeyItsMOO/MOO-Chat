@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { getPlan, PLANS } from '@/lib/plans';
 import { currentPeriod } from '@/lib/usage';
@@ -33,7 +34,12 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Platform overview</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Platform overview</h1>
+        <Link href="/admin/promos" className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
+          Promo codes →
+        </Link>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat label="Tenants" value={totalTenants.toLocaleString()} />

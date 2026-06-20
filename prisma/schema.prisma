@@ -50,12 +50,19 @@ model Tenant {
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
 
+  // Promo / credits (see PromoCode). creditCents is a stored balance; the
+  // discount window is an active percentage-off applied to the next subscription.
+  creditCents     Int       @default(0)
+  discountPercent Int       @default(0)
+  discountUntil   DateTime?
+
   assistant      Assistant?
   memberships    Membership[]
   allowedDomains AllowedDomain[]
   conversations  Conversation[]
   leads          Lead[]
   usageCounters  UsageCounter[]
+  promoRedemptions PromoRedemption[]
 }
 
 model Membership {
@@ -213,4 +220,44 @@ model UsageCounter {
 
   @@unique([tenantId, period])
   @@index([tenantId])
+}
+
+// ── Promo codes ─────────────────────────────────────────────────────
+// One code can grant free time (extended trial or a comped plan), a percentage
+// discount window, or account credit. Redeemed at signup, on the billing page,
+// or applied by an admin. Each tenant can redeem a given code once.
+model PromoCode {
+  id              String   @id @default(cuid())
+  code            String   @unique // stored UPPERCASE
+  description     String   @default("")
+  benefit         String   @default("free_days") // free_days | percent_off | credit
+  planId          String   @default("") // comp target (free_days) / scope (optional)
+  days            Int      @default(0) // free_days: trial/comp days
+  percentOff      Int      @default(0) // percent_off: 1..100
+  durationMonths  Int      @default(1) // percent_off: months the discount applies
+  amountCents     Int      @default(0) // credit: amount in cents
+  currency        String   @default("AUD")
+  maxRedemptions  Int      @default(0) // 0 = unlimited
+  redemptionCount Int      @default(0)
+  expiresAt       DateTime?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  redemptions PromoRedemption[]
+}
+
+model PromoRedemption {
+  id        String   @id @default(cuid())
+  codeId    String
+  tenantId  String
+  userId    String   @default("")
+  note      String   @default("") // snapshot of what was applied
+  createdAt DateTime @default(now())
+
+  code   PromoCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  tenant Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([codeId, tenantId])
+  @@index([tenantId])
+  @@index([codeId])
 }
