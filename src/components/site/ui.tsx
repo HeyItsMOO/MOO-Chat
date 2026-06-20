@@ -14,7 +14,7 @@ export function PageHeader({
 }) {
   return (
     <section className="border-b-4 border-dashed border-pasture/70">
-      <div className={`container-x pt-14 pb-12 sm:pt-16 ${center ? 'text-center' : ''}`}>
+      <div className={`container-x py-14 sm:py-16 ${center ? 'text-center' : ''}`}>
         <div className={center ? 'mx-auto max-w-3xl' : 'max-w-3xl'}>
           {eyebrow && (
             <div className="mb-4">

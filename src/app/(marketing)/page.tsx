@@ -91,7 +91,7 @@ export default function Landing() {
       </section>
 
       {/* ── What it does ─────────────────────────────────────── */}
-      <section id="features" className="container-x scroll-mt-24 py-20">
+      <section id="features" className="container-x scroll-mt-24 py-12">
         <Reveal>
           <SectionHeading
             eyebrow="What it does"
