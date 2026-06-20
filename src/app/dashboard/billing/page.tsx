@@ -1,5 +1,5 @@
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan, effectivePlan, isTrialActive, trialDaysLeft, CURRENCY_SYMBOL } from '@/lib/plans';
+import { getPlan, effectivePlan, isTrialActive, trialDaysLeft } from '@/lib/plans';
 import { getUsage } from '@/lib/usage';
 import { PAYPAL_CONFIGURED } from '@/lib/paypal';
 import { BillingPlans } from './BillingPlans';
@@ -82,17 +82,6 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-ink-soft">
           💳 <strong>PayPal isn&apos;t connected yet.</strong> Add <code>PAYPAL_CLIENT_ID</code> / <code>PAYPAL_SECRET</code> to
           <code> .env</code> and run <code>npm run paypal:setup</code> to create the plans. Until then, upgrade buttons are disabled.
-        </div>
-      )}
-
-      {(tenant.creditCents > 0 || (tenant.discountPercent > 0 && tenant.discountUntil && new Date(tenant.discountUntil) > new Date())) && (
-        <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
-          {tenant.creditCents > 0 && (
-            <div>🎁 Account credit: <strong>{CURRENCY_SYMBOL}{(tenant.creditCents / 100).toFixed(2)}</strong></div>
-          )}
-          {tenant.discountPercent > 0 && tenant.discountUntil && new Date(tenant.discountUntil) > new Date() && (
-            <div>🏷️ <strong>{tenant.discountPercent}% off</strong> active until {new Date(tenant.discountUntil).toLocaleDateString()}.</div>
-          )}
         </div>
       )}
 

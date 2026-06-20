@@ -1,18 +1,20 @@
 /**
  * Promo codes.
  *
- * A code grants ONE of three benefits when redeemed by a tenant:
+ * A code grants ONE of three benefits when redeemed by a tenant. All three are
+ * realized as FREE TIME (per product decision) — value we fully control,
+ * independent of PayPal:
  *   - free_days   : extend the trial by N days, or (if planId set) comp that
- *                   plan free for N days — fully under our control.
- *   - percent_off : a % discount for N months, recorded on the tenant and
- *                   surfaced at checkout (applied where billing supports it).
- *   - credit      : add an account-credit balance (cents).
+ *                   plan free for N days.
+ *   - percent_off : X% off for N months → the equivalent number of free days
+ *                   (X% × N months ≈ that fraction of a month, in days).
+ *   - credit      : a $ amount → free days worth that much on the reference plan.
  *
  * Each tenant can redeem a given code once; codes can have an expiry and a max
  * total redemptions.
  */
 import { prisma } from './db';
-import { PLANS, CURRENCY_SYMBOL, getPlan, type PlanId } from './plans';
+import { PLANS, CURRENCY_SYMBOL, getPlan, TRIAL_PLAN_ID, type PlanId } from './plans';
 
 export const PROMO_BENEFITS = ['free_days', 'percent_off', 'credit'] as const;
 export type PromoBenefit = (typeof PROMO_BENEFITS)[number];
@@ -26,33 +28,49 @@ function addDays(base: Date, days: number): Date {
   d.setUTCDate(d.getUTCDate() + days);
   return d;
 }
-function addMonths(base: Date, months: number): Date {
-  const d = new Date(base);
-  d.setUTCMonth(d.getUTCMonth() + months);
-  return d;
+
+function isPaidPlan(id: string): boolean {
+  return !!id && id !== 'free' && (id as PlanId) in PLANS;
 }
 
 type PromoRow = NonNullable<Awaited<ReturnType<typeof prisma.promoCode.findUnique>>>;
 
-/** A plain-English summary of what a code does (admin list + success message). */
-export function describePromo(c: {
+type PromoLike = {
   benefit: string;
   planId: string;
   days: number;
   percentOff: number;
   durationMonths: number;
   amountCents: number;
-  currency: string;
-}): string {
+};
+
+/**
+ * Free days a code is worth. percent_off and credit are converted to the
+ * equivalent free time; `fallbackPlanId` is the reference plan used to price a
+ * credit code when the code itself isn't scoped to a plan.
+ */
+export function realizedFreeDays(c: PromoLike, fallbackPlanId: string = TRIAL_PLAN_ID): number {
+  if (c.benefit === 'free_days') return c.days;
+  if (c.benefit === 'percent_off') return Math.round((c.percentOff / 100) * c.durationMonths * 30);
+  if (c.benefit === 'credit') {
+    const refId = isPaidPlan(c.planId) ? c.planId : isPaidPlan(fallbackPlanId) ? fallbackPlanId : TRIAL_PLAN_ID;
+    const ref = getPlan(refId);
+    return ref.priceMonthly > 0 ? Math.round((c.amountCents / (ref.priceMonthly * 100)) * 30) : 0;
+  }
+  return 0;
+}
+
+/** A plain-English summary of what a code does (admin list + success message). */
+export function describePromo(c: PromoLike & { currency?: string }): string {
   if (c.benefit === 'free_days') {
-    const plan = c.planId && (c.planId as PlanId) in PLANS ? getPlan(c.planId) : null;
+    const plan = isPaidPlan(c.planId) ? getPlan(c.planId) : null;
     return plan ? `${c.days} days of ${plan.name} free` : `${c.days} extra trial days`;
   }
   if (c.benefit === 'percent_off') {
-    return `${c.percentOff}% off for ${c.durationMonths} month${c.durationMonths === 1 ? '' : 's'}`;
+    return `${c.percentOff}% off for ${c.durationMonths} month${c.durationMonths === 1 ? '' : 's'} (≈ ${realizedFreeDays(c)} free days)`;
   }
   if (c.benefit === 'credit') {
-    return `${CURRENCY_SYMBOL}${(c.amountCents / 100).toFixed(2)} account credit`;
+    return `${CURRENCY_SYMBOL}${(c.amountCents / 100).toFixed(2)} credit (≈ ${realizedFreeDays(c)} free days)`;
   }
   return 'Promo';
 }
@@ -113,39 +131,34 @@ export async function redeemPromo(opts: {
       if (!tenant) throw new Error('Account not found.');
 
       const now = new Date();
-      const note = describePromo(fresh);
 
-      if (fresh.benefit === 'free_days') {
-        const compPlan = fresh.planId && (fresh.planId as PlanId) in PLANS && fresh.planId !== 'free';
-        if (compPlan) {
-          // Comp the plan: extend the paid-through date from the later of now /
-          // current renewal, and flip the account active on that plan.
-          const base = tenant.planRenewsAt && tenant.planRenewsAt.getTime() > now.getTime() ? tenant.planRenewsAt : now;
-          await tx.tenant.update({
-            where: { id: tenant.id },
-            data: { plan: fresh.planId, status: 'active', planRenewsAt: addDays(base, fresh.days) },
-          });
-        } else {
-          // Extend the trial from the later of now / current trial end.
-          const base = tenant.trialEndsAt && tenant.trialEndsAt.getTime() > now.getTime() ? tenant.trialEndsAt : now;
-          await tx.tenant.update({
-            where: { id: tenant.id },
-            data: { status: 'trialing', trialEndsAt: addDays(base, fresh.days) },
-          });
-        }
-      } else if (fresh.benefit === 'percent_off') {
-        const base = tenant.discountUntil && tenant.discountUntil.getTime() > now.getTime() ? tenant.discountUntil : now;
+      // Every benefit type is realized as free time. Convert percent_off / credit
+      // to an equivalent number of free days, then either comp a paid plan or
+      // extend the trial.
+      const days = realizedFreeDays(fresh, tenant.plan);
+      if (days <= 0) throw new Error('This code has no value to apply.');
+
+      // Comp target: the code's plan if it names one, else the tenant's current
+      // paid plan, else extend the trial.
+      const targetPlanId = isPaidPlan(fresh.planId) ? fresh.planId : isPaidPlan(tenant.plan) ? tenant.plan : '';
+
+      let note: string;
+      if (isPaidPlan(targetPlanId)) {
+        // Extend the paid-through date from the later of now / current renewal.
+        const base = tenant.planRenewsAt && tenant.planRenewsAt.getTime() > now.getTime() ? tenant.planRenewsAt : now;
         await tx.tenant.update({
           where: { id: tenant.id },
-          data: { discountPercent: fresh.percentOff, discountUntil: addMonths(base, fresh.durationMonths) },
+          data: { plan: targetPlanId, status: 'active', planRenewsAt: addDays(base, days) },
         });
-      } else if (fresh.benefit === 'credit') {
-        await tx.tenant.update({
-          where: { id: tenant.id },
-          data: { creditCents: { increment: fresh.amountCents } },
-        });
+        note = `${days} days of ${getPlan(targetPlanId).name} free`;
       } else {
-        throw new Error('Unsupported promo type.');
+        // Extend the trial from the later of now / current trial end.
+        const base = tenant.trialEndsAt && tenant.trialEndsAt.getTime() > now.getTime() ? tenant.trialEndsAt : now;
+        await tx.tenant.update({
+          where: { id: tenant.id },
+          data: { status: 'trialing', trialEndsAt: addDays(base, days) },
+        });
+        note = `${days} extra trial days`;
       }
 
       await tx.promoCode.update({ where: { id: fresh.id }, data: { redemptionCount: { increment: 1 } } });
