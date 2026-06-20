@@ -94,6 +94,11 @@ model Assistant {
   disclaimer     String @default("")
   showPoweredBy  Boolean @default(true)
 
+  // Custom scripts (raw <script>/HTML) the tenant injects on their own site
+  // alongside the widget — e.g. analytics, pixels, their own integrations.
+  // Served via the widget config only on plans where features.customScripts is on.
+  customScripts  String @default("")
+
   // Contact info surfaced in replies/fallbacks
   phone        String @default("")
   contactEmail String @default("")

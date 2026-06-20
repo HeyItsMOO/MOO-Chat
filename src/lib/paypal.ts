@@ -144,6 +144,7 @@ export async function createPlan(opts: {
   name: string;
   price: number;
   currency?: string;
+  intervalUnit?: 'MONTH' | 'YEAR';
 }): Promise<string> {
   const res = await ppFetch('/v1/billing/plans', {
     method: 'POST',
@@ -153,7 +154,7 @@ export async function createPlan(opts: {
       status: 'ACTIVE',
       billing_cycles: [
         {
-          frequency: { interval_unit: 'MONTH', interval_count: 1 },
+          frequency: { interval_unit: opts.intervalUnit || 'MONTH', interval_count: 1 },
           tenure_type: 'REGULAR',
           sequence: 1,
           total_cycles: 0, // 0 = until cancelled

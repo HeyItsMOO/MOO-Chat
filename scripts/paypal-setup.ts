@@ -23,10 +23,10 @@ async function main() {
   }
 
   const { createProduct, createPlan, paypalBase } = await import('../src/lib/paypal');
-  const { PLANS, PAID_PLAN_IDS } = await import('../src/lib/plans');
+  const { PLANS, PAID_PLAN_IDS, CURRENCY, YEARLY_MONTHS_CHARGED, priceForInterval } = await import('../src/lib/plans');
   const { BRAND } = await import('../src/lib/brand');
 
-  console.log(`Using PayPal: ${paypalBase()}\n`);
+  console.log(`Using PayPal: ${paypalBase()} (currency ${CURRENCY})\n`);
 
   const productId = await createProduct(`${BRAND.name}`, BRAND.tagline);
   console.log('✓ Created product:', productId);
@@ -34,9 +34,29 @@ async function main() {
   const lines: string[] = [];
   for (const id of PAID_PLAN_IDS) {
     const plan = PLANS[id];
-    const planId = await createPlan({ productId, name: `${BRAND.name} ${plan.name}`, price: plan.priceMonthly });
-    console.log(`✓ Created plan ${plan.name} ($${plan.priceMonthly}/mo):`, planId);
-    lines.push(`PAYPAL_PLAN_${id.toUpperCase()}="${planId}"`);
+
+    // Monthly
+    const monthlyId = await createPlan({
+      productId,
+      name: `${BRAND.name} ${plan.name} (Monthly)`,
+      price: plan.priceMonthly,
+      currency: CURRENCY,
+      intervalUnit: 'MONTH',
+    });
+    console.log(`✓ Created plan ${plan.name} (${CURRENCY} ${plan.priceMonthly}/mo):`, monthlyId);
+    lines.push(`PAYPAL_PLAN_${id.toUpperCase()}="${monthlyId}"`);
+
+    // Yearly — 10× the monthly price (2 months free).
+    const yearlyPrice = priceForInterval(plan, 'yearly');
+    const yearlyId = await createPlan({
+      productId,
+      name: `${BRAND.name} ${plan.name} (Yearly)`,
+      price: yearlyPrice,
+      currency: CURRENCY,
+      intervalUnit: 'YEAR',
+    });
+    console.log(`✓ Created plan ${plan.name} (${CURRENCY} ${yearlyPrice}/yr = ${YEARLY_MONTHS_CHARGED}× monthly):`, yearlyId);
+    lines.push(`PAYPAL_PLAN_${id.toUpperCase()}_YEARLY="${yearlyId}"`);
   }
 
   console.log('\n──────────── paste into .env ────────────');

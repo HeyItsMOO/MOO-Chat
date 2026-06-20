@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { PLAN_LIST, formatPrice } from '@/lib/plans';
+import { PLAN_LIST, CUSTOM_PLAN } from '@/lib/plans';
 import { pageMeta, softwareAppJsonld, faqJsonld, breadcrumbJsonld } from '@/lib/seo';
 import { JsonLd } from '@/components/site/JsonLd';
 import { PageHeader, CTASection } from '@/components/site/ui';
+import { PricingPlans } from './PricingPlans';
 
 export const metadata: Metadata = pageMeta({
   title: 'Pricing',
@@ -51,44 +52,13 @@ export default function PricingPage() {
 
       <PageHeader
         eyebrow="Pricing"
-        title="Simple, monthly pricing."
-        subtitle="Prices in AUD. Start free, or take a 5-day trial of Growth — no credit card. Upgrade when you grow."
+        title="Simple pricing, monthly or yearly."
+        subtitle="Prices in AUD. Start free, or take a 5-day trial of Growth — no credit card. Go yearly for 2 months free, or talk to us about a Custom plan."
       />
 
-      {/* Plan cards */}
+      {/* Plan cards + monthly/yearly toggle + Custom band */}
       <section className="container-x pb-6">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {PLAN_LIST.map((p) => (
-            <div
-              key={p.id}
-              className={`card-moo flex flex-col p-6 ${p.highlight ? 'bg-pasture-light' : ''}`}
-              style={p.highlight ? { boxShadow: '8px 8px 0 #1a1a1a' } : undefined}
-            >
-              {p.highlight && (
-                <div className="mb-2"><span className="badge-moo text-[11px] uppercase tracking-wide">Most popular</span></div>
-              )}
-              <h2 className="font-heading text-lg font-bold">{p.name}</h2>
-              <div className="mt-2">
-                <span className="font-heading text-4xl font-extrabold">{formatPrice(p.priceMonthly)}</span>
-                {p.priceMonthly > 0 && <span className="text-ink-mute">/mo</span>}
-              </div>
-              <ul className="mt-4 flex-1 space-y-2 text-sm font-semibold text-ink-soft">
-                <li>✓ {p.messagesPerMonth.toLocaleString()} AI replies / month</li>
-                <li>{p.features.leadCapture ? '✓' : '·'} Lead capture form</li>
-                <li>{p.features.liveChat ? '✓' : '·'} Live chat handoff</li>
-                <li>{p.features.removeBranding ? '✓' : '·'} Remove branding</li>
-                <li>
-                  {p.features.extraDomains > 0 ? '✓' : '·'}{' '}
-                  {p.features.extraDomains > 0 ? `${p.features.extraDomains} extra domain(s)` : 'Single domain'}
-                </li>
-                <li>✓ {p.models.length} AI model tier{p.models.length > 1 ? 's' : ''}</li>
-              </ul>
-              <Link href="/signup" className={`mt-6 w-full text-center ${p.highlight ? 'btn-moo' : 'btn-ghost'}`}>
-                {p.priceMonthly === 0 ? 'Start free' : `Choose ${p.name}`}
-              </Link>
-            </div>
-          ))}
-        </div>
+        <PricingPlans />
       </section>
 
       {/* Comparison table */}
@@ -99,7 +69,7 @@ export default function PricingPage() {
             <thead>
               <tr className="border-b border-slate-200 text-left">
                 <th className="py-3 pr-4 font-semibold text-ink">Feature</th>
-                {PLAN_LIST.map((p) => (
+                {COMPARE_PLANS.map((p) => (
                   <th key={p.id} className="px-4 py-3 font-semibold text-ink">{p.name}</th>
                 ))}
               </tr>
@@ -108,7 +78,7 @@ export default function PricingPage() {
               {COMPARISON.map((row) => (
                 <tr key={row.label} className="border-b border-slate-100">
                   <td className="py-3 pr-4 font-medium text-ink">{row.label}</td>
-                  {PLAN_LIST.map((p) => (
+                  {COMPARE_PLANS.map((p) => (
                     <td key={p.id} className="px-4 py-3">{row.value(p)}</td>
                   ))}
                 </tr>
@@ -140,7 +110,9 @@ export default function PricingPage() {
   );
 }
 
-type PlanRow = { label: string; value: (p: (typeof PLAN_LIST)[number]) => string };
+const COMPARE_PLANS = [...PLAN_LIST, CUSTOM_PLAN];
+
+type PlanRow = { label: string; value: (p: (typeof COMPARE_PLANS)[number]) => string };
 const yn = (b: boolean) => (b ? '✓' : '—');
 
 const COMPARISON: PlanRow[] = [
@@ -148,6 +120,7 @@ const COMPARISON: PlanRow[] = [
   { label: 'Lead capture', value: (p) => yn(p.features.leadCapture) },
   { label: 'Live chat handoff', value: (p) => yn(p.features.liveChat) },
   { label: 'Remove branding', value: (p) => yn(p.features.removeBranding) },
+  { label: 'Custom scripts', value: (p) => yn(p.features.customScripts) },
   { label: 'Extra domains', value: (p) => String(p.features.extraDomains) },
   { label: 'AI model tiers', value: (p) => String(p.models.length) },
 ];

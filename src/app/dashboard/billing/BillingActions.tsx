@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 
 export function BillingActions({
   planId,
+  interval = 'monthly',
   isCurrent,
   paypalConfigured,
   hasSubscription,
 }: {
   planId: string;
+  interval?: 'monthly' | 'yearly';
   isCurrent: boolean;
   paypalConfigured: boolean;
   hasSubscription: boolean;
@@ -27,7 +29,7 @@ export function BillingActions({
       const res = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId }),
+        body: JSON.stringify({ plan: planId, interval }),
       });
       const data = await res.json();
       if (!res.ok) {

@@ -1,8 +1,8 @@
 import { getCurrentContext } from '@/lib/auth';
-import { getPlan, effectivePlan, PLAN_LIST, formatPrice, isTrialActive, trialDaysLeft } from '@/lib/plans';
+import { getPlan, effectivePlan, isTrialActive, trialDaysLeft } from '@/lib/plans';
 import { getUsage } from '@/lib/usage';
 import { PAYPAL_CONFIGURED } from '@/lib/paypal';
-import { BillingActions } from './BillingActions';
+import { BillingPlans } from './BillingPlans';
 
 const BANNERS: Record<string, { text: string; tone: 'ok' | 'warn' | 'err' }> = {
   upgraded: { text: '🎉 You’re upgraded! Your new plan is active.', tone: 'ok' },
@@ -84,34 +84,11 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {PLAN_LIST.map((p) => (
-          <div key={p.id} className={`rounded-2xl border p-5 ${p.id === actualPlan.id ? 'border-brand-600 ring-1 ring-brand-600' : 'border-slate-200'}`}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold">{p.name}</h3>
-              {p.id === actualPlan.id && <span className="text-xs font-semibold text-brand-700">Current</span>}
-            </div>
-            <div className="mt-1 text-2xl font-extrabold">
-              {formatPrice(p.priceMonthly)}
-              {p.priceMonthly > 0 && <span className="text-sm font-normal text-ink-mute">/mo</span>}
-            </div>
-            <ul className="mt-3 space-y-1 text-sm text-ink-soft">
-              <li>✓ {p.messagesPerMonth.toLocaleString()} replies / month</li>
-              <li>{p.features.liveChat ? '✓' : '·'} Live chat handoff</li>
-              <li>{p.features.removeBranding ? '✓' : '·'} Remove branding</li>
-              <li>✓ {1 + p.features.extraDomains} domain(s)</li>
-            </ul>
-            <div className="mt-4">
-              <BillingActions
-                planId={p.id}
-                isCurrent={p.id === actualPlan.id}
-                paypalConfigured={PAYPAL_CONFIGURED}
-                hasSubscription={!!tenant.paypalSubscriptionId}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <BillingPlans
+        actualPlanId={actualPlan.id}
+        paypalConfigured={PAYPAL_CONFIGURED}
+        hasSubscription={!!tenant.paypalSubscriptionId}
+      />
     </div>
   );
 }
