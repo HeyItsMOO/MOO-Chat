@@ -79,6 +79,20 @@ model Membership {
   @@index([tenantId])
 }
 
+// Password reset tokens. We store only a SHA-256 hash of the token that was
+// emailed — the raw token lives only in the reset link. Single-use (usedAt) and
+// short-lived (expiresAt); the issuing flow keeps at most one active per user.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
 // ── The assistant's configuration (1:1 with a tenant) ───────────────
 
 model Assistant {

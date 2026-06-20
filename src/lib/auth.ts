@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { prisma } from './db';
 
 const COOKIE = 'moo_session';
@@ -20,6 +21,11 @@ export async function hashPassword(plain: string) {
 
 export async function verifyPassword(plain: string, hash: string) {
   return bcrypt.compare(plain, hash);
+}
+
+/** SHA-256 of a password-reset token — only the hash is stored server-side. */
+export function hashResetToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 // Run a bcrypt comparison against a dummy hash when no user is found, so the
