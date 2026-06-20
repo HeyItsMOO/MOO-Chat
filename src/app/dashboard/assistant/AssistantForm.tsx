@@ -237,7 +237,7 @@ export default function AssistantForm({
             {/* Auto-setup from a website */}
             <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
               <div className="text-sm font-semibold text-brand-700">✨ Auto-fill from your website</div>
-              <p className="mt-1 text-xs text-ink-soft">We&apos;ll read your site and draft a knowledge base for you.</p>
+              <p className="mt-1 text-xs text-ink-soft">We&apos;ll deep-scan your site — pages, business details, and FAQs — and draft a knowledge base for you.</p>
               <div className="mt-2 flex gap-2">
                 <input
                   value={autofillUrl}
@@ -250,7 +250,7 @@ export default function AssistantForm({
                   disabled={autofilling || !autofillUrl.trim()}
                   className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
-                  {autofilling ? 'Reading…' : 'Auto-fill'}
+                  {autofilling ? 'Scanning…' : 'Auto-fill'}
                 </button>
               </div>
               {autofillMsg && <p className="mt-2 text-xs text-ink-soft">{autofillMsg}</p>}
